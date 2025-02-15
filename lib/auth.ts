@@ -12,9 +12,15 @@ export const auth = betterAuth({
         enabled: true
     },
     socialProviders: { 
-    //    github: { 
-    //     clientId: process.env.GITHUB_CLIENT_ID, 
-    //     clientSecret: process.env.GITHUB_CLIENT_SECRET, 
-    //    } 
+       github: { 
+        clientId: process.env.GITHUB_CLIENT_ID, 
+        clientSecret: process.env.GITHUB_CLIENT_SECRET, 
+       } 
     }, 
+    account: {
+        accountLinking: {
+            enabled: true, 
+            providers: ["github"],
+        }
+    },
 })

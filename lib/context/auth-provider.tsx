@@ -12,6 +12,7 @@ type AuthContextType = {
     isLoading: boolean;
     error: string | null;
     signIn: (email: string, password: string) => void;
+    signInWithGithub: () => void;
     signUp: (email: string, password: string, name: string) => void;
     signOut: () => void;
 };
@@ -21,6 +22,7 @@ export const AuthContext = createContext<AuthContextType>({
     isLoading: true,
     error: null,
     signIn: () => {},
+    signInWithGithub: () => {},
     signUp: () => {},
     signOut: () => {},
 });
@@ -81,6 +83,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 variant: "destructive"
             });
         });
+    }
+
+    function signInWithGithub() {
+        toast({
+            title: "Signing in",
+            description: "Redirecting to GitHub...",
+        });
+        
+        authClient.signIn.social({
+            provider: "github",
+        })
     }
 
     function signUp(email: string, password: string, name: string) {
@@ -144,6 +157,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             isLoading, 
             error: errorMessage,
             signIn, 
+            signInWithGithub,
             signUp, 
             signOut 
         }}>

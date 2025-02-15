@@ -1,12 +1,13 @@
 "use client"
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import Image from "next/image"
-import { Bell, ChevronRight } from "lucide-react"
-import Link from "next/link"
+import { SignInModal } from "@/components/auth/sign-in-modal"
+import { SignUpModal } from "@/components/auth/sign-up-modal"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { User } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useAuth } from "@/lib/context/auth-provider"
+import { Bell, ChevronRight, User } from "lucide-react"
+import Link from "next/link"
 
 interface BreadcrumbItem {
   label: string
@@ -18,6 +19,8 @@ export default function Navbar() {
     { label: "relaiy", href: "#" },
     { label: "dashboard", href: "#" },
   ]
+
+  const { user, signOut } = useAuth();
 
   return (
     <nav className="px-3 sm:px-6 flex items-center justify-between bg-white dark:bg-[#0F0F12] border-b border-gray-200 dark:border-[#1F1F23] h-full">
@@ -49,29 +52,38 @@ export default function Navbar() {
 
         <ThemeToggle />
 
-        <DropdownMenu>
-          <DropdownMenuTrigger className="focus:outline-none">
-            <Image
-              src="https://avatars.githubusercontent.com/u/31494954?v=4"
-              alt="User avatar"
-              width={28}
-              height={28}
-              className="rounded-full ring-2 ring-gray-200 dark:ring-[#2B2B30] sm:w-8 sm:h-8 cursor-pointer"
-            />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            sideOffset={8}
-            className="w-[280px] sm:w-80 bg-background border-border rounded-lg shadow-lg"
-          >
-            <Avatar>
-              <AvatarImage src="https://avatars.githubusercontent.com/u/31494954?v=4" />
-              <AvatarFallback>
-                <User className="h-4 w-4" />
-              </AvatarFallback>
-            </Avatar>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="focus:outline-none">
+              <Avatar>
+                <AvatarImage src={user.image ?? undefined} />
+                <AvatarFallback>
+                  <User className="h-4 w-4" />
+                </AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              sideOffset={8}
+              className="w-[280px] sm:w-80 bg-background border-border rounded-lg shadow-lg"
+            >
+              <DropdownMenuItem>
+                <div className="flex flex-col space-y-1">
+                  <p className="font-medium">{user.name}</p>
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => signOut()}>
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <div className="flex items-center gap-2">
+            <SignInModal />
+            <SignUpModal />
+          </div>
+        )}
       </div>
     </nav>
   )

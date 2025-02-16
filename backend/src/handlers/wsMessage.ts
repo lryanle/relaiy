@@ -5,11 +5,17 @@ import z from 'zod';
 import { selectBestResponse } from '../utils/mcts';
 import db from '../db';
 import { twilioClient } from '../twilio';
+import { RetellResponse } from '../types/llmWebSocket';
 
 const messageSchema = z.object({
     chatId: z.string(),
     message: z.string(),
-    destination: z.string().optional()
+    destination: z.string().optional(),
+    retell: z.object({
+        type: z.string(),
+        data: z.any(),
+        response_id: z.number().optional()
+    }).optional()
 });
 
 type ChatMessage = { role: 'user' | 'assistant', content: string };
@@ -86,6 +92,8 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
             }
         });
 
+
+
         const responses: ResponseFormat[] = [];
         const modelUsage: Record<string, { input: number; output: number; cost: number }> = {};
 
@@ -117,6 +125,8 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
                             responses: parsedResponses,
                             timestamp: new Date().toISOString()
                         }));
+
+                        console.log(modelName, parsedResponses);
 
                         responses.push(...parsedResponses);
                     } else {
@@ -155,6 +165,7 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
             const totalOutputTokens = Object.values(modelUsage).reduce((sum, usage) => sum + usage.output, 0);
             const totalCost = Object.values(modelUsage).reduce((sum, usage) => sum + usage.cost, 0);
 
+            console.log('parsedMessage.data.message', parsedMessage.data.message);
             // Modified database transaction to include usage data
             await db.$transaction([
                 db.chatMessage.createMany({
@@ -181,19 +192,48 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
                 })
             ]);
 
-            // Include usage information in the response to client
-            ws.send(JSON.stringify({
-                chatId: parsedMessage.data.chatId,
-                bestResponse,
-                isComplete,
-                usage: {
-                    inputTokens: totalInputTokens,
-                    outputTokens: totalOutputTokens,
-                    cost: totalCost,
-                    models: modelUsage
+            console.log([
+                {
+                    threadId: parsedMessage.data.chatId,
+                    content: parsedMessage.data.message,
+                    sender: 'USER'
                 },
-                timestamp: new Date().toISOString()
-            }));
+                {
+                    threadId: parsedMessage.data.chatId,
+                    content: bestResponse,
+                    sender: 'ASSISTANT',
+                    inputTokenUsage: totalInputTokens,
+                    outputTokenUsage: totalOutputTokens,
+                    cost: totalCost,
+                    modelName: Object.keys(modelUsage).join(',') // Store all models used
+                }
+            ]);
+
+            // Send response to Retell if it's a Retell message
+            if (parsedMessage.data.retell) {
+                const retellResponse: RetellResponse = {
+                    response_id: parsedMessage.data.retell.response_id || 0,
+                    content: bestResponse,
+                    content_complete: true,
+                    end_call: isComplete,
+                };
+                
+                ws.send(JSON.stringify(retellResponse));
+            } else {
+                // Existing response sending code
+                ws.send(JSON.stringify({
+                    chatId: parsedMessage.data.chatId,
+                    bestResponse,
+                    isComplete,
+                    usage: {
+                        inputTokens: totalInputTokens,
+                        outputTokens: totalOutputTokens,
+                        cost: totalCost,
+                        models: modelUsage
+                    },
+                    timestamp: new Date().toISOString()
+                }));
+            }
 
             if (parsedMessage.data.destination) {
                 await twilioClient.messages.create({

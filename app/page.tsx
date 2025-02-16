@@ -681,7 +681,7 @@ export default function Home() {
   }
 
   return (
-    <div className="container mx-auto flex flex-col md:flex-row gap-4 justify-center items-start">
+    <div className="p-4 container mx-auto flex flex-col md:flex-row gap-4 justify-center items-start">
       <DataTable 
         columns={columns} 
         data={tableData} 

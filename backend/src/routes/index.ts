@@ -31,7 +31,6 @@ index.post('/create-chat', async (req, res) => {
             data: {
                 goal,
                 userId,
-                accountId: userId,
                 destination,
                 type,
             }

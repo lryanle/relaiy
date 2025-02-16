@@ -1,5 +1,7 @@
 import { useState } from "react"
 
+import { useAuth } from "@/lib/context/auth-provider"
+import { useWebSocket } from "@/lib/context/websocket-provider"
 import { cn, getOldDataPoints } from "@/lib/utils"
 import { ChatMessage } from "@/types/chat"
 import { Conversation } from "@/types/types"
@@ -33,10 +35,18 @@ export default function ChatBody({ chatId, messages }: ChatBodyProps) {
         return lastMessage.role === "assistant"
     }
 
+    const {
+        isLive,
+        dataPoints
+    } = useWebSocket()
+
+    const { user } = useAuth()
+
 
     const [selectedMessage, setSelectedMessage] = useState<ChatMessage | null>(null)
+    const [selectedMessageIndex, setSelectedMessageIndex] = useState<number | null>(0)
     const [selectedConvo, setSelectedConvo] = useState<Conversation | null>(null)
-    const [dataPoints, setDataPoints] = useState<ConversationState[]>([])
+    const [newDataPoints, setNewDataPoints] = useState<ConversationState[]>([])
 
     function getStatusFromScore(score: number, maxScore: number, minScore: number) {
         if (score === maxScore) {
@@ -51,13 +61,18 @@ export default function ChatBody({ chatId, messages }: ChatBodyProps) {
     }
 
     async function _getOldDataPoints() {
-        const data = await getOldDataPoints(chatId, 0)
-        setSelectedConvo(data.chat)
 
+        if (!selectedMessageIndex) return
+
+        // get messages index
+        const idx = messages.length - 1 - selectedMessageIndex!
+
+        const data = await getOldDataPoints(chatId, idx)
+        setSelectedConvo(data.chat)
         const maxScore = Math.max(...data.stockfishResponse.map(state => state.ratio))
         const minScore = Math.min(...data.stockfishResponse.map(state => state.ratio))
 
-        setDataPoints(data.stockfishResponse.map(state => ({
+        setNewDataPoints(data.stockfishResponse.map(state => ({
             status: getStatusFromScore(state.ratio, maxScore, minScore),
             modelType: state.modelName ?? "",
             messages: [
@@ -78,6 +93,12 @@ export default function ChatBody({ chatId, messages }: ChatBodyProps) {
         }
     }, [selectedMessage])
 
+    useEffect(() => {
+        if (user) {
+            _getOldDataPoints()
+        }
+    }, [user])
+
     return (
         <div className="relative flex flex-row justify-center items-center h-full w-full">
 
@@ -96,13 +117,15 @@ export default function ChatBody({ chatId, messages }: ChatBodyProps) {
 
                             if (selectedMessage === message || i === 0) {
                                 setSelectedMessage(null)
+                                setSelectedMessageIndex(null)
+                                setNewDataPoints([])
                                 return
                             }
 
                             if (message.role === "assistant") {
                                 setSelectedMessage(message)
-                                setSelectedConvo(null)
-                                setDataPoints([])
+                                setSelectedMessageIndex(i)
+                                setNewDataPoints([])
                             }
                         }}
                         key={i}
@@ -122,11 +145,11 @@ export default function ChatBody({ chatId, messages }: ChatBodyProps) {
                 ))}
             </div>
 
-            {selectedMessage && selectedConvo && (
+            {(isLive || (selectedConvo && newDataPoints.length > 0)) && (
                 <div className="pt-2 pr-4 animate-slide-left-in duration-600 overflow-x-visible">
                     <InspectAgent
-                        selectedConvo={selectedConvo}
-                        states={dataPoints}
+                        selectedConvo={selectedConvo!}
+                        states={isLive ? Object.values(dataPoints) : newDataPoints}
                     />
                 </div>
             )}

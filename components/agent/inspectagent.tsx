@@ -193,7 +193,7 @@ export function InspectAgent({ selectedConvo, states, title = "Conversation Eval
                         </span>
                       </span>
                       <span className="text-sm font-medium dark:text-gray-700 text-gray-300">
-                        {state.messages[state.messages.length - 1].content}
+                        {state.messages.length > 0 && state.messages[state.messages.length - 1].content}
                       </span>
                     </span>
                   </div>
@@ -244,7 +244,7 @@ export function InspectAgent({ selectedConvo, states, title = "Conversation Eval
                         </span>
                       </span>
                       <span className="text-sm font-medium dark:text-gray-700 text-gray-300">
-                        {state.messages[state.messages.length - 1].content}
+                        {state.messages.length > 0 && state.messages[state.messages.length - 1].content}
                       </span>
                     </span>
                   </div>

@@ -12,6 +12,15 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
 
+        // First get the account
+        const account = await prisma.account.findFirst({
+            where: { userId: session.user.id },
+            select: {
+                requirements: true,
+                tones: true
+            }
+        })
+
         // Get all chat threads for the user
         const chatThreads = await prisma.chatThread.findMany({
             where: {
@@ -44,8 +53,8 @@ export async function GET(request: Request) {
             last_activity: thread.ChatMessage[thread.ChatMessage.length - 1]?.updatedAt ?? thread.createdAt,
             message_count: thread._count.ChatMessage,
             goal: thread.goal,
-            requirements: thread.requirements,
-            tones: thread.tones,
+            requirements: account?.requirements || [],
+            tones: account?.tones || [],
             // Calculate total cost
             total_cost: thread.ChatMessage.reduce((sum, msg) => sum + (msg.cost || 0), 0)
         }))

@@ -157,7 +157,7 @@ app.ws('/llm-websocket/:call_id', async (ws, req) => {
 
 
             // Process message using existing handler
-            wsMessage(ws, formattedMessage);
+            wsMessage(ws, formattedMessage, true);
             
         } catch (error) {
             console.error('Error parsing message:', error);

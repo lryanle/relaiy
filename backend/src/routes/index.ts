@@ -15,14 +15,12 @@ const createChatSchema = z.object({
 
 const index = Router();
 
-
-
 index.get('/', (req, res) => {
     res.send('Hello world!');
 });
 
 index.post('/create-chat', async (req, res) => {
-    const { goal, userId, firstMessage, destination, type, tones, requirements } = req.body;
+    const { goal, userId, firstMessage, destination, type } = req.body;
 
     const validated = createChatSchema.safeParse(req.body);
     if (!validated.success) {
@@ -35,10 +33,9 @@ index.post('/create-chat', async (req, res) => {
             data: {
                 goal,
                 userId,
+                accountId: userId,
                 destination,
                 type,
-                tones,
-                requirements,
             }
         });
 

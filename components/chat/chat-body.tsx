@@ -24,6 +24,10 @@ export default function ChatBody({ chatId, messages }: ChatBodyProps) {
     }, [messages])
 
     function isWaitingForResponse() {
+
+        if (messages.length === 0) return false
+
+
         const lastMessage = messages[messages.length - 1]
         return lastMessage.role === "assistant"
     }

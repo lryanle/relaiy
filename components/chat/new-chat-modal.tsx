@@ -10,11 +10,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createNewChat } from "@/lib/utils"
-import { MessageSquare, Phone, Plus, Mail } from "lucide-react"
+import { Mail, MessageSquare, Phone, Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { FaDiscord } from "react-icons/fa"
@@ -45,7 +45,7 @@ export function NewChatModal() {
     try {
       const chats = await createNewChat(formData)
       if (chats) {
-        router.push(`/chat/${chats[0].id}`)
+        router.push(`/chat/${chats.id}`)
         setOpen(false)
       }
     } catch (error) {

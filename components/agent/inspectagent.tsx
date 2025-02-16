@@ -74,6 +74,8 @@ export function InspectAgent({ selectedConvo, states, title = "Conversation Eval
 
   const getMCColor = (status: ConversationState["status"]) => {
     switch (status) {
+      case "best":
+        return randomBlue();
       case "good":
         return randomGreen();
       case "okay":

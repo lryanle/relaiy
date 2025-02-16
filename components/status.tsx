@@ -14,7 +14,7 @@ export default function Status({ status, size = "sm" }: Readonly<StatusProps>) {
         return "bg-green-500";
       case "inactive":
         return "bg-amber-500";
-      case "complete":
+      case "completed":
         return "bg-slate-500";
     }
   };

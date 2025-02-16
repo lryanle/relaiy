@@ -1,12 +1,13 @@
 "use client"
 
+import { InspectAgent } from "@/components/agent/inspectagent"
 import { columns } from "@/components/table/columns"
 import { DataTable } from "@/components/table/data-table"
 import Spinner from "@/components/ui/spinner"
+import { useWebSocket } from "@/lib/context/websocket-provider"
 import { getChatsForUser } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 import { Conversation, StateStatus } from "@/types/types"
-import { InspectAgent } from "@/components/agent/inspectagent"
 import { useState } from "react"
 
 // const data: Conversation[] = [
@@ -674,12 +675,30 @@ export default function Home() {
     totalPrice: chat.total_cost,
   })) || []
 
+  const {dataPoints} = useWebSocket()
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center w-full h-full">
         <Spinner />
       </div>
     )
+  }
+
+  const maxScore = Math.max(...Object.values(dataPoints).map(state => state.score))
+  const minScore = Math.min(...Object.values(dataPoints).map(state => state.score))
+  console.log(maxScore, minScore) 
+
+  function getStatusFromScore(score: number) {
+    if (score === maxScore) {
+      return "best"
+    } else if (score > 0.75) {
+      return "good"
+    } else if (score > 0.65) {
+      return "okay"
+    } else {
+      return "bad"
+    }
   }
 
   return (
@@ -690,9 +709,9 @@ export default function Home() {
         onRowClick={setSelectedConvo}
         selectedConvo={selectedConvo}
       />
-      {selectedConvo && <InspectAgent setSelectedConvo={setSelectedConvo} selectedConvo={selectedConvo} states={states.map(state => ({
+      {selectedConvo && <InspectAgent setSelectedConvo={setSelectedConvo} selectedConvo={selectedConvo} states={Object.values(dataPoints).map(state => ({
         ...state,
-        status: state.status.toLowerCase() as StateStatus
+        status: getStatusFromScore(state.score)
       }))} />}
     </div>
   )

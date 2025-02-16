@@ -1,12 +1,12 @@
 "use client"
 
-import type { ColumnDef } from "@tanstack/react-table"
-import { Conversation } from "@/types/types"
-import { Mail, MessageCircle, Phone, CircleHelp } from "lucide-react"
-import { FaDiscord } from "react-icons/fa"
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { formatCurrency, formatDateTime, formatReceipientId } from "@/lib/utils"
 import TimeEmbed from "@/components/timeembed"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { formatCurrency, formatDateTime, formatReceipientId } from "@/lib/utils"
+import { Conversation } from "@/types/types"
+import type { ColumnDef } from "@tanstack/react-table"
+import { CircleHelp, Mail, MessageCircle, Phone } from "lucide-react"
+import { FaDiscord } from "react-icons/fa"
 
 const getChannelIcon = (channel: Conversation["channel"]) => {
   switch (channel) {
@@ -48,7 +48,7 @@ export const columns: ColumnDef<Conversation>[] = [
         <TooltipProvider>
           <Tooltip delayDuration={0}>
             <TooltipTrigger className="h-full">
-              <span className={`h-full cursor-help p-2 pr-2.5 flex items-center justify-start ${row.original.status === "active" ? "bg-green-500/15 text-green-500 border-green-500/30" : row.original.status === "complete" ? "bg-slate-500/15 text-slate-500 border-slate-500/30" : "bg-amber-500/15 text-amber-500 border-amber-500/30"}`}>{getChannelIcon(channel)}</span>
+              <span className={`h-full cursor-help p-2 pr-2.5 flex items-center justify-start ${row.original.status === "active" ? "bg-green-500/15 text-green-500 border-green-500/30" : row.original.status === "completed" ? "bg-slate-500/15 text-slate-500 border-slate-500/30" : "bg-amber-500/15 text-amber-500 border-amber-500/30"}`}>{getChannelIcon(channel)}</span>
             </TooltipTrigger>
             <TooltipContent side="right" sideOffset={0}>
               <div className="flex flex-col items-start">

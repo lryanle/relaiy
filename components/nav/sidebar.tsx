@@ -3,14 +3,15 @@
 import { Icons } from "@/components/icons";
 import NavItem from "@/components/nav/navitem";
 import Status from "@/components/status";
-import { formatReceipientId, formatTimeAgo, getChatsForUser } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useWebSocket } from "@/lib/context/websocket-provider";
+import { cn, formatReceipientId, formatTimeAgo, getChatsForUser } from "@/lib/utils";
 import { routes } from "@/routing";
 import { ChatTab } from "@/types/chat";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftFromLine, Menu } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 //! TODO: CONNECT TO ROUTE
 
 
@@ -71,6 +72,8 @@ export default function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSidebarTempOpen, setIsSidebarTempOpen] = useState(false);
+
+  const { currentChatId } = useWebSocket()
 
   // Modify the mouse enter handler to be smoother
   const handleMouseEnter = () => {
@@ -218,7 +221,9 @@ export default function Sidebar() {
                       <Link
                         key={cagent.id + cagent.type + cagent.status + cagent.recipient_address}
                         href={`/conversation/${cagent.id}`}
-                        className="gap-4 animate-in fade-in-0 duration-300 w-full flex justify-start items-center px-3 py-1 text-sm rounded-md transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
+                        className={cn("gap-4 animate-in fade-in-0 duration-300 w-full flex justify-start items-center px-3 py-1 text-sm rounded-md transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]", 
+                          currentChatId === cagent.id ? "bg-gray-50 dark:bg-[#1F1F23]" : ""
+                        )}
                       >
                         <Status status={cagent.status } />
                         <div className="flex flex-col items-start">

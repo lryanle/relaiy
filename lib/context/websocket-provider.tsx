@@ -2,7 +2,7 @@
 
 import { toast } from "@/hooks/use-toast"
 import { useAuth } from "@/lib/context/auth-provider"
-import { WebSocketContextType } from "@/types/websocket"
+import { DataPoint, ResponseStatus, WebSocketContextType } from "@/types/websocket"
 import { useQueryClient } from "@tanstack/react-query"
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
 
@@ -13,6 +13,7 @@ const WebSocketContext = createContext<WebSocketContextType>({
     lastMessage: null,
     currentChatId: null,
     setCurrentChatId: () => { },
+    dataPoints: {}
 })
 
 type ResponsePool = {
@@ -26,17 +27,8 @@ type ResponsePool = {
     timestamp: string
 }
 
-type ResponseStatus = "best" | "okay" | "bad" | "pending" | "error"
 
-type DataPoint = {
-    modelType: string
-    status: ResponseStatus
-    messages: {
-        role: "user" | "assistant"
-        content: string
-    }[]
-    score: number
-}
+
 
 type SingleResponse = {
     type: "response"
@@ -93,7 +85,7 @@ export function WebSocketProvider({
     const queryClient = useQueryClient()
     const { user } = useAuth()
 
-    const [ids, setIds] = useState<Record<string, DataPoint>>({})
+    const [dataPoints, setDataPoints] = useState<Record<string, DataPoint>>({})
     const [bestId, setBestId] = useState<DataPoint | null>(null)
 
     const handleMessage = useCallback(async (event: MessageEvent) => {
@@ -104,6 +96,7 @@ export function WebSocketProvider({
             // Handle different message types
             switch (message.type) {
                 case "responsePools":
+                    setDataPoints({})
                     // Store response pools if needed
                     // loop through the pools and set the ids
                     if (currentChatId) {
@@ -112,8 +105,8 @@ export function WebSocketProvider({
                     }
                     for (const [model, ids] of Object.entries(message.pools)) {
                         for (const id of ids) {
-                            setIds(prevIds => ({
-                                ...prevIds,
+                            setDataPoints(prevDataPoints => ({
+                                ...prevDataPoints,
                                 [id]: {
                                     modelType: model,
                                     status: "pending",
@@ -139,10 +132,10 @@ export function WebSocketProvider({
                 "timestamp": "2025-02-16T10:15:50.302Z"
                     */
 
-                    setIds(prevIds => ({
-                        ...prevIds,
+                    setDataPoints(prevDataPoints => ({
+                        ...prevDataPoints,
                         [message.responseId]: {
-                            ...prevIds[message.responseId],
+                            ...prevDataPoints[message.responseId],
                             modelType: message.model,
                             status: "okay",
                             messages: [{ role: "assistant", content: message.response }],
@@ -155,30 +148,33 @@ export function WebSocketProvider({
                 default:
                     // Handle best response
 
-                    if (message.bestResponse.responseId) {
-                        setBestId(ids[message.bestResponse.responseId] || null)
-                        setIds(prevIds => ({
-                            ...prevIds,
+                    if (message.bestResponse?.responseId) {
+                        setBestId(dataPoints[message.bestResponse.responseId] || null)
+                        setDataPoints(prevDataPoints => ({
+                            ...prevDataPoints,
                             [message.bestResponse.responseId]: {
-                                ...prevIds[message.bestResponse.responseId],
+                                ...prevDataPoints[message.bestResponse.responseId],
                                 status: "best",
                                 messages: [{ role: "assistant", content: message.bestResponse.response }],
-                                score: message.bestResponse.score
+                                score: message.bestResponse.score ?? 0
                             }
                         }))
 
-                        for (const [id, response] of Object.entries(message.allResponses)) {
-                            setIds(prevIds => ({
-                                ...prevIds,
-                                [id]: {
-                                    ...prevIds[id],
-                                    status: response.status,
-                                    messages: [{ role: "assistant", content: response.response }],
-                                    score: response.score
-                                }
-                            }))
-                        }
+                        
                     }
+
+                    for (const response of message.allResponses) {
+                        setDataPoints(prevDataPoints => ({
+                            ...prevDataPoints,
+                            [response.responseId]: {
+                                ...prevDataPoints[response.responseId],
+                                status: response.status,
+                                messages: [{ role: "assistant", content: response.response }],
+                                score: response.ratio
+                            }
+                        }))
+                    }
+
                     if (currentChatId) {
                         await queryClient.invalidateQueries({ queryKey: ["chat", currentChatId] })
                         await queryClient.invalidateQueries({ queryKey: ["chats"] })
@@ -241,7 +237,7 @@ export function WebSocketProvider({
         return () => {
             socket.removeEventListener('message', handleMessage)
         }
-    }, [handleMessage, currentChatId]);
+    }, [handleMessage, currentChatId, user?.id, url])
 
     const sendMessage = (message: any) => {
         if (socketRef.current?.readyState === WebSocket.OPEN) {
@@ -264,6 +260,7 @@ export function WebSocketProvider({
                 lastMessage,
                 currentChatId,
                 setCurrentChatId,
+                dataPoints
             }}
         >
             {children}

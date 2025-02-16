@@ -19,8 +19,6 @@ model ChatThread {
   account            account             @relation(fields: [accountId], references: [accountId])
   destination        String
   type               ChannelType
-  requirements       String[]
-  tones              String[]
   messages           ChatMessage[]
   stockfishResponses StockfishResponse[]
 }

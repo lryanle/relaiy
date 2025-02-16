@@ -142,13 +142,13 @@ export const models = {
         }
     }),
 
-    qwen: createModel({
+    qwen_deepseek_r1_distill: createModel({
         provider: 'openrouter',
-        modelName: 'qwen/qwen-plus',
+        modelName: 'deepseek/deepseek-r1-distill-qwen-14b',
         apiKey: process.env.OPENROUTER_API_KEY!,
         price: {
-            input: 0.4,
-            output: 1.2
+            input: 1.6,
+            output: 1.6
         }
     }),
 };

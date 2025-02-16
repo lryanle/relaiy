@@ -28,6 +28,10 @@ model ChatMessage {
   content   String
   sender    Sender
   thread    ChatThread   @relation(fields: [threadId], references: [id])
+  inputTokenUsage Int @default(0)
+  outputTokenUsage Int @default(0)
+  cost Float @default(0)
+  modelName String?
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt @default(now())
 }

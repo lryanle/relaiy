@@ -30,7 +30,7 @@ export async function GET(request: Request) {
     const chatThread = await prisma.chatThread.findFirst({
       where: {
         id: chatId,
-        userId: userIdFromAccount?.id
+        userId: userIdFromAccount?.userId
       },
       include: {
         ChatMessage: {

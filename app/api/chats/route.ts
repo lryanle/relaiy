@@ -15,16 +15,12 @@ export async function GET(request: Request) {
         // First get the account
         const account = await prisma.account.findFirst({
             where: { userId: session.user.id },
-            select: {
-                requirements: true,
-                tones: true
-            }
         })
 
         // Get all chat threads for the user
         const chatThreads = await prisma.chatThread.findMany({
             where: {
-                userId: session.user.id
+                userId: account?.userId
             },
             include: {
                 ChatMessage: {

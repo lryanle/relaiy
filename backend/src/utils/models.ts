@@ -63,15 +63,15 @@ export const models = {
     //     }
     // }),
 
-    // gpt4oMini: createModel({
-    //     provider: 'openrouter',
-    //     modelName: 'openai/gpt-4o-mini',
-    //     apiKey: process.env.OPENROUTER_API_KEY!,
-    //     price: {
-    //         input: 0.15,
-    //         output: 0.60
-    //     }
-    // }),
+    gpt4oMini: createModel({
+        provider: 'openrouter',
+        modelName: 'openai/gpt-4o-mini',
+        apiKey: process.env.OPENROUTER_API_KEY!,
+        price: {
+            input: 0.15,
+            output: 0.60
+        }
+    }),
 
     // sonar: createModel({
     //     provider: 'openrouter',
@@ -83,15 +83,15 @@ export const models = {
     //     }
     // }),
 
-    // claude_3_5_haiku: createModel({
-    //     provider: 'openrouter',
-    //     modelName: 'anthropic/claude-3-5-haiku',
-    //     apiKey: process.env.OPENROUTER_API_KEY!,
-    //     price: {
-    //         input: 0.5,
-    //         output: 2
-    //     }
-    // }),
+    claude_3_5_haiku: createModel({
+        provider: 'openrouter',
+        modelName: 'anthropic/claude-3-5-haiku',
+        apiKey: process.env.OPENROUTER_API_KEY!,
+        price: {
+            input: 0.5,
+            output: 2
+        }
+    }),
     gemini: createModel({
         provider: 'gemini',
         modelName: 'gemini-2.0-flash-lite-preview-02-05',
@@ -132,23 +132,23 @@ export const models = {
     //     }
     // }),
 
-    // gemini_flash_thinking: createModel({
-    //     provider: 'gemini',
-    //     modelName: 'gemini-2.0-flash-thinking-exp-01-21',
-    //     apiKey: process.env.GEMINI_API_KEY!,
-    //     price: {
-    //         input: 0,
-    //         output: 0
-    //     }
-    // }),
+    gemini_flash_thinking: createModel({
+        provider: 'gemini',
+        modelName: 'gemini-2.0-flash-thinking-exp-01-21',
+        apiKey: process.env.GEMINI_API_KEY!,
+        price: {
+            input: 0,
+            output: 0
+        }
+    }),
 
-    // qwen: createModel({
-    //     provider: 'openrouter',
-    //     modelName: 'qwen/qwen-plus',
-    //     apiKey: process.env.OPENROUTER_API_KEY!,
-    //     price: {
-    //         input: 0.4,
-    //         output: 1.2
-    //     }
-    // }),
+    qwen_deepseek_r1_distill: createModel({
+        provider: 'openrouter',
+        modelName: 'deepseek/deepseek-r1-distill-qwen-14b',
+        apiKey: process.env.OPENROUTER_API_KEY!,
+        price: {
+            input: 1.6,
+            output: 1.6
+        }
+    }),
 };

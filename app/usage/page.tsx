@@ -1,101 +1,196 @@
-import Image from "next/image";
+"use client"
+
+import { useState, useMemo } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import RequestsOverTime from "@/components/usage/requestsovertime"
+import CostOverTime from "@/components/usage/costovertime"
+import CostByType from "@/components/usage/costbytype"
+import TokensByType from "@/components/usage/tokensbytype"
+import TokensOverTime from "@/components/usage/tokensovertime"
+import TotalUsageCard from "@/components/usage/totalusage"
+import ModelUsageCard from "@/components/usage/modelusage"
+import TransactionsTable from "@/components/usage/transactionstable"
+import { Transaction } from "@/types/types"
+
+//! TODO: @bryant connect with api data
+const MOCK_TRANSACTIONS: Transaction[] = [
+  {
+    id: "1",
+    timestamp: new Date("2023-06-01"),
+    model: "GPT-4",
+    cost: 0.123,
+    tokens: { input: 100, output: 150 },
+    type: "SMS"
+  },
+]
 
 export default function Usage() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-[100vh-64px] p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-lexend)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-oxygen-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [timeRange, setTimeRange] = useState("7d")
+  const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  // Derived data calculations
+  const totalStats = useMemo(() => {
+    return transactions.reduce((acc, curr) => ({
+      requests: acc.requests + 1,
+      cost: acc.cost + curr.cost,
+      inputTokens: acc.inputTokens + curr.tokens.input,
+      outputTokens: acc.outputTokens + curr.tokens.output
+    }), {
+      requests: 0,
+      cost: 0,
+      inputTokens: 0,
+      outputTokens: 0
+    })
+  }, [transactions])
+
+  const modelUsage = useMemo(() => {
+    const usage = transactions.reduce((acc, curr) => {
+      acc[curr.model] = (acc[curr.model] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+    
+    const total = Object.values(usage).reduce((a, b) => a + b, 0)
+    return Object.entries(usage).map(([model, count]) => ({
+      model,
+      percentage: (count / total) * 100
+    }))
+  }, [transactions])
+
+  // Group data by date for time-series charts
+  const timeSeriesData = useMemo(() => {
+    const grouped = transactions.reduce((acc, curr) => {
+      const date = curr.timestamp.toISOString().split('T')[0]
+      if (!acc[date]) {
+        acc[date] = {
+          date,
+          requests: 0,
+          cost: 0,
+          tokens: { input: 0, output: 0 }
+        }
+      }
+      acc[date].requests++
+      acc[date].cost += curr.cost
+      acc[date].tokens.input += curr.tokens.input
+      acc[date].tokens.output += curr.tokens.output
+      return acc
+    }, {} as Record<string, any>)
+
+    return Object.values(grouped)
+  }, [transactions])
+  
+  const typeData = useMemo(() => {
+    return transactions.reduce((acc, curr) => {
+      if (!acc[curr.type]) {
+        acc[curr.type] = {
+          name: curr.type,
+          cost: 0,
+          input: 0,
+          output: 0
+        }
+      }
+      acc[curr.type].cost += curr.cost
+      acc[curr.type].input += curr.tokens.input
+      acc[curr.type].output += curr.tokens.output
+      return acc
+    }, {} as Record<string, any>)
+  }, [transactions])
+
+  return (
+    <div className="container mx-auto p-4">
+      <div className="mb-4">
+        <Select value={timeRange} onValueChange={setTimeRange}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select time range" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="24h">Last 24 hours</SelectItem>
+            <SelectItem value="7d">Last 7 days</SelectItem>
+            <SelectItem value="30d">Last 30 days</SelectItem>
+            <SelectItem value="90d">Last 90 days</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <TotalUsageCard stats={totalStats} />
+        <ModelUsageCard models={modelUsage} />
+      </div>
+      <Tabs defaultValue="requests">
+        <TabsList>
+          <TabsTrigger value="requests">Requests</TabsTrigger>
+          <TabsTrigger value="cost">Cost</TabsTrigger>
+          <TabsTrigger value="tokens">Tokens</TabsTrigger>
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+        </TabsList>
+        <TabsContent value="requests">
+          <Card>
+            <CardHeader>
+              <CardTitle>Requests Over Time</CardTitle>
+              <CardDescription>Number of requests made over the selected time period</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RequestsOverTime data={timeSeriesData} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="cost">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Cost Over Time</CardTitle>
+                <CardDescription>Total cost over the selected time period</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CostOverTime data={timeSeriesData} />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Cost by Type</CardTitle>
+                <CardDescription>Cost breakdown by channel type</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CostByType data={Object.values(typeData)} />
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        <TabsContent value="tokens">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Tokens by Type</CardTitle>
+                <CardDescription>Token usage breakdown by channel type</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TokensByType data={Object.values(typeData)} />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Tokens Over Time</CardTitle>
+                <CardDescription>Token usage over the selected time period</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TokensOverTime data={timeSeriesData} />
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        <TabsContent value="transactions">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Transactions</CardTitle>
+              <CardDescription>List of all transactions in the selected time period</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TransactionsTable data={transactions} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
-  );
+  )
 }
+

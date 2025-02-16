@@ -1,16 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/hooks/use-toast"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { ArrowRightIcon, TrashIcon } from "lucide-react"
 import Link from "next/link"
-import { toast } from "@/hooks/use-toast"
+import { useEffect, useState } from "react"
 
 const tones = [
   "Boomer Tone",
@@ -36,11 +37,38 @@ const toggles = [
   { id: "noEndPeriod", label: "No end period" },
 ]
 
+const id2Label: Record<string, string> = {
+    noUppercase: "No uppercase",
+    allCaps: "All caps",
+    extraEmojis: "Extra Emojis",
+    fewEmojis: "Few Emojis",
+    noEndPeriod: "No end period"
+}
+
 export default function FineTuning() {
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
   const [selectedTones, setSelectedTones] = useState<string[]>([])
   const [toggleStates, setToggleStates] = useState<Record<string, boolean>>({})
   const [requirements, setRequirements] = useState<string[]>([])
   const [newRequirement, setNewRequirement] = useState("")
+
+  const { data: settings } = useQuery({
+    queryKey: ['finetuning'],
+    queryFn: async () => {
+      const response = await fetch('/api/finetuning')
+      if (!response.ok) throw new Error('Failed to fetch settings')
+      return response.json()
+    }
+  })
+
+  useEffect(() => {
+    if (settings) {
+      setSelectedTones(settings.tones || [])
+      setToggleStates(settings.toggleStates || {})
+      setRequirements(settings.requirements || [])
+    }
+  }, [settings])
 
   const handleToneChange = (tone: string) => {
     setSelectedTones((prev) => (prev.includes(tone) ? prev.filter((t) => t !== tone) : [...prev, tone]))
@@ -61,11 +89,53 @@ export default function FineTuning() {
     setRequirements((prev) => prev.filter((_, i) => i !== index))
   }
 
+  const updateSettings = useMutation({
+    mutationFn: async (settings: {
+      selectedTones: string[]
+      toggleStates: Record<string, boolean>
+      requirements: string[]
+    }) => {
+      const response = await fetch('/api/finetuning', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings),
+      })
+      if (!response.ok) {
+        throw new Error('Failed to update settings')
+      }
+      return response.json()
+    },
+    onSuccess: () => {
+      toast({
+        title: "Settings Updated",
+        description: "Your fine-tuning settings have been saved.",
+      })
+      queryClient.invalidateQueries({ queryKey: ['user'] })
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update settings.",
+        variant: "destructive"
+      })
+    }
+  })
+
   const handleSubmit = () => {
-    //! TODO: @Bryant
-    console.log("Selected Tones:", selectedTones)
-    console.log("Toggle States:", toggleStates)
-    console.log("Requirements:", requirements)
+    const enabledToggles = Object.entries(toggleStates)
+        .filter(([_, enabled]) => enabled)
+        .reduce((acc, [key]) => ({
+            ...acc,
+            [key]: true
+        }), {} as Record<string, boolean>)
+
+    updateSettings.mutate({
+        selectedTones,
+        toggleStates: enabledToggles,
+        requirements
+    })
   }
 
   return (

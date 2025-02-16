@@ -13,7 +13,8 @@ const WebSocketContext = createContext<WebSocketContextType>({
     lastMessage: null,
     currentChatId: null,
     setCurrentChatId: () => { },
-    dataPoints: {}
+    dataPoints: {},
+    isLive: false
 })
 
 type ResponsePool = {
@@ -88,6 +89,8 @@ export function WebSocketProvider({
     const [dataPoints, setDataPoints] = useState<Record<string, DataPoint>>({})
     const [bestId, setBestId] = useState<DataPoint | null>(null)
 
+    const [isLive, setIsLive] = useState(false)
+
     const handleMessage = useCallback(async (event: MessageEvent) => {
         try {
             const message: WebSocketMessage = JSON.parse(event.data)
@@ -97,6 +100,7 @@ export function WebSocketProvider({
             switch (message.type) {
                 case "responsePools":
                     setDataPoints({})
+                    setIsLive(true)
                     // Store response pools if needed
                     // loop through the pools and set the ids
                     if (currentChatId) {
@@ -121,7 +125,7 @@ export function WebSocketProvider({
                 case "response":
                     // Handle individual model responses
                     // You might want to store these or update UI
-
+                    setIsLive(true)
                     /*
 
                 "type": "response",
@@ -149,6 +153,7 @@ export function WebSocketProvider({
                     // Handle best response
 
                     if (message.bestResponse?.responseId) {
+                        setIsLive(false)
                         setBestId(dataPoints[message.bestResponse.responseId] || null)
                         setDataPoints(prevDataPoints => ({
                             ...prevDataPoints,
@@ -176,12 +181,13 @@ export function WebSocketProvider({
                     }
 
                     if (currentChatId) {
-                        await queryClient.invalidateQueries({ queryKey: ["chat", currentChatId] })
+                        await queryClient.invalidateQueries({ queryKey: ["conversation", currentChatId] })
                         await queryClient.invalidateQueries({ queryKey: ["chats"] })
                     }
                     break
             }
         } catch (error) {
+            setIsLive(false)
             console.error("Error parsing message:", error)
         }
 
@@ -205,6 +211,7 @@ export function WebSocketProvider({
 
         socket.addEventListener('close', () => {
             setIsConnected(false)
+            setIsLive(false)
             toast({
                 title: "Disconnected",
                 description: "WebSocket connection closed",
@@ -213,6 +220,7 @@ export function WebSocketProvider({
         })
 
         socket.addEventListener('error', () => {
+            setIsLive(false)
             toast({
                 title: "Error",
                 description: "WebSocket connection error",
@@ -260,7 +268,8 @@ export function WebSocketProvider({
                 lastMessage,
                 currentChatId,
                 setCurrentChatId,
-                dataPoints
+                dataPoints,
+                isLive
             }}
         >
             {children}

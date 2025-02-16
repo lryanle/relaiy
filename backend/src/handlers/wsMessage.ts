@@ -6,6 +6,7 @@ import { selectBestResponse } from '../utils/mcts';
 import db from '../db';
 import { twilioClient } from '../twilio';
 import { RetellResponse } from '../types/llmWebSocket';
+import { v7 as uuidv7 } from 'uuid';
 
 const messageSchema = z.object({
     chatId: z.string(),
@@ -30,6 +31,7 @@ interface ModelResponse {
     };
 }
 
+
 function parseModelResponse(content: string): ResponseFormat[] {
     try {
         // Try to find and parse JSON array in the response
@@ -43,7 +45,9 @@ function parseModelResponse(content: string): ResponseFormat[] {
         return parsed.map(item => ({
             response: typeof item.response === 'string' ? item.response : '',
             isComplete: Boolean(item.isComplete),
-            reason: typeof item.reason === 'string' ? item.reason : undefined
+            reason: typeof item.reason === 'string' ? item.reason : undefined,
+            modelName: item.modelName,
+            responseId: item.responseId
         })).filter(item => item.response); // Filter out empty responses
     } catch (error) {
         console.error('Failed to parse model response:', error);
@@ -87,12 +91,24 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
                 name: 'Duy',
                 age: 20,
                 gender: 'male',
-                location: 'Ho Chi Minh City',
+                location: 'Dallas, TX',
                 interests: ['badminton', 'coding', 'traveling']
             }
         });
 
+        // Generate response IDs pool (10 per model)
+        const responseIdPools: Record<string, string[]> = {};
+        Object.keys(models).forEach(modelName => {
+            responseIdPools[modelName] = Array.from({ length: 10 }, () => uuidv7());
+        });
 
+        // Send initial ID pools to client
+        ws.send(JSON.stringify({
+            type: 'responsePools',
+            chatId: parsedMessage.data.chatId,
+            pools: responseIdPools,
+            timestamp: new Date().toISOString()
+        }));
 
         const responses: ResponseFormat[] = [];
         const modelUsage: Record<string, { input: number; output: number; cost: number }> = {};
@@ -116,19 +132,33 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
                                    (result.usage_metadata.output_tokens * model.price.output)) / 1_000_000
                         };
                     }
-
-                    // Only send valid responses back to client
+;
+                    // Send responses with IDs
                     if (parsedResponses.length > 0) {
-                        ws.send(JSON.stringify({
-                            chatId: parsedMessage.data.chatId,
-                            model: modelName,
-                            responses: parsedResponses,
-                            timestamp: new Date().toISOString()
-                        }));
+                        parsedResponses.forEach((response, index) => {
+                            // Use modulo to ensure we stay within the pool size of 10
+                            const poolIndex = index % 10;
+                            const responseId = responseIdPools[modelName][poolIndex];
 
-                        console.log(modelName, parsedResponses);
+                            const responseData = {
+                                type: 'response',
+                                chatId: parsedMessage.data.chatId,
+                                responseId,
+                                model: modelName,
+                                response: response.response,
+                                timestamp: new Date().toISOString()
+                            };
 
-                        responses.push(...parsedResponses);
+                            ws.send(JSON.stringify(responseData));
+                            responses.push({
+                                response: response.response,
+                                isComplete: response.isComplete,
+                                modelName: modelName,
+                                responseId: responseId
+                            });
+                            
+                        });
+
                     } else {
                         console.warn(`Model ${modelName} returned no valid responses`);
                         ws.send(JSON.stringify({
@@ -152,9 +182,11 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
             }
         }));
 
-        // Only proceed if we have valid responses
+        // Calculate scores and status for all responses
         if (responses.length > 0) {
-            const bestResponse = selectBestResponse(responses.map(response => response.response));
+            const bestResponse = selectBestResponse(responses);
+
+            console.log(bestResponse);
             
             // Require at least 2 responses for completion voting
             const completionVotes = responses.filter(r => r.isComplete).length;
@@ -177,7 +209,7 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
                         },
                         {
                             threadId: parsedMessage.data.chatId,
-                            content: bestResponse,
+                            content: bestResponse.bestResponse.response,
                             sender: 'ASSISTANT',
                             inputTokenUsage: totalInputTokens,
                             outputTokenUsage: totalOutputTokens,
@@ -213,7 +245,7 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
             if (parsedMessage.data.retell) {
                 const retellResponse: RetellResponse = {
                     response_id: parsedMessage.data.retell.response_id || 0,
-                    content: bestResponse,
+                    content: bestResponse.bestResponse.response,
                     content_complete: true,
                     end_call: isComplete,
                 };
@@ -223,7 +255,8 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
                 // Existing response sending code
                 ws.send(JSON.stringify({
                     chatId: parsedMessage.data.chatId,
-                    bestResponse,
+                    bestResponse: bestResponse.bestResponse,
+                    allResponses: bestResponse.allResponses,
                     isComplete,
                     usage: {
                         inputTokens: totalInputTokens,
@@ -237,7 +270,7 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
 
             if (parsedMessage.data.destination) {
                 await twilioClient.messages.create({
-                    body: bestResponse,
+                    body: bestResponse.bestResponse.response,
                     to: `whatsapp:${parsedMessage.data.destination}`,
                     from: 'whatsapp:+14155238886',
                 });

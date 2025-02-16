@@ -102,25 +102,25 @@ export const models = {
         }
     }),
 
-    // mistral: createModel({
-    //     provider: 'openrouter',
-    //     modelName: 'mistralai/codestral-2501',
-    //     apiKey: process.env.OPENROUTER_API_KEY!,
-    //     price: {
-    //         input: 0.3,
-    //         output: 0.9
-    //     }
-    // }),
+    mistral: createModel({
+        provider: 'openrouter',
+        modelName: 'mistralai/codestral-2501',
+        apiKey: process.env.OPENROUTER_API_KEY!,
+        price: {
+            input: 0.3,
+            output: 0.9
+        }
+    }),
 
-    // cohere: createModel({
-    //     provider: 'openrouter',
-    //     modelName: 'cohere/command-r7b-12-2024',
-    //     apiKey: process.env.OPENROUTER_API_KEY!,
-    //     price: {
-    //         input: 0.075,
-    //         output: 0.30
-    //     }
-    // }),
+    cohere: createModel({
+        provider: 'openrouter',
+        modelName: 'cohere/command-r7b-12-2024',
+        apiKey: process.env.OPENROUTER_API_KEY!,
+        price: {
+            input: 0.075,
+            output: 0.30
+        }
+    }),
 
     // nvidia: createModel({
     //     provider: 'openrouter',

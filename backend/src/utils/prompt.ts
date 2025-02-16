@@ -21,11 +21,13 @@ const PromptSchema = z.object({
 type PromptParams = z.infer<typeof PromptSchema>;
 
 // Add new type for response format
-type ResponseFormat = {
+export interface ResponseFormat {
     response: string;
     isComplete: boolean;
     reason?: string;
-};
+    modelName: string;
+    responseId: string;
+}
 
 // Create prompt template
 export const createPrompt = (params: PromptParams) => {
@@ -59,5 +61,3 @@ export const createPrompt = (params: PromptParams) => {
 
     return prompt;
 };
-
-export type { ResponseFormat };

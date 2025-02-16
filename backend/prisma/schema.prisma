@@ -36,6 +36,7 @@ model ChatMessage {
   updatedAt DateTime     @updatedAt @default(now())
 }
 
+
 model account {
   id                    String    @id @default(uuid())
   accountId             String

@@ -1,18 +1,23 @@
+import type { ResponseFormat } from './prompt';
 interface Node {
     response: string;
     visits: number;
     score: number;
     children: Node[];
     parent: Node | null;
+    modelName: string;
+    responseId: string;
 }
 
-function createNode(response: string, parent: Node | null = null): Node {
+function createNode(response: string, parent: Node | null = null, modelName: string, responseId: string): Node {
     return {
         response,
         visits: 0,
         score: 0,
         children: [],
-        parent
+        parent,
+        modelName,
+        responseId
     };
 }
 
@@ -41,50 +46,68 @@ function select(node: Node): Node {
 function simulate(response: string): number {
     let score = 0;
     
-    // Length penalty (prefer responses between 30-150 characters)
+    // Base score from length (more granular scaling)
     const length = response.length;
-    if (length >= 30 && length <= 150) {
-        score += 0.4;
-    } else if (length < 20 || length > 200) {
-        score -= 0.4;
-    }
-    
-    // Personality and engagement scoring
-    if (/\b(I|me|my|mine)\b/i.test(response)) {
+    if (length >= 50 && length <= 120) {
+        score += 0.5;
+    } else if (length >= 30 && length <= 150) {
         score += 0.3;
+    } else if (length < 20 || length > 200) {
+        score -= 0.3;
     }
     
-    // Natural conversation markers
-    if (/\b(hey|oh|well|so|actually|yeah|cool|nice)\b/i.test(response)) {
-        score += 0.25;
-    }
+    // Personality scoring (weighted by count)
+    const personalityWords = (response.match(/\b(I|me|my|mine)\b/gi) || []).length;
+    score += Math.min(0.3, personalityWords * 0.1);
     
-    // Question engagement (but not too many questions)
+    // Natural conversation markers (weighted by variety)
+    const conversationMarkers = new Set(response.match(/\b(hey|oh|well|so|actually|yeah|cool|nice)\b/gi) || []);
+    score += Math.min(0.3, conversationMarkers.size * 0.08);
+    
+    // Question engagement (scaled penalty)
     const questionCount = (response.match(/\?/g) || []).length;
     if (questionCount === 1) {
         score += 0.3;
     } else if (questionCount > 1) {
-        score -= 0.2; // Penalize multiple questions
+        score -= questionCount * 0.15; // Increasing penalty for more questions
     }
     
-    // Flirty/friendly tone
-    if (/\b(fun|hang out|coffee|meet|date|together|chat|talk)\b/i.test(response)) {
-        score += 0.3;
-    }
+    // Engagement words (weighted by variety)
+    const engagementWords = new Set(response.match(/\b(fun|hang|coffee|meet|date|together|chat|talk)\b/gi) || []);
+    score += Math.min(0.4, engagementWords.size * 0.1);
     
-    // Penalize red flags
-    if (/\b(AI|model|assistant|apologize|sorry|cannot|unable)\b/i.test(response)) {
-        score -= 0.6;
-    }
+    // Red flags (weighted by severity and count)
+    const redFlags = {
+        severe: /\b(AI|model|assistant|apologize|sorry|cannot|unable)\b/gi,
+        moderate: /\b(hereby|furthermore|nevertheless|thus|therefore|moreover)\b/gi,
+        mild: /\b(system|process|function|execute)\b/gi
+    };
     
-    if (/\b(hereby|furthermore|nevertheless|thus|therefore|moreover)\b/i.test(response)) {
-        score -= 0.4; // Too formal
-    }
+    const severeCount = (response.match(redFlags.severe) || []).length;
+    const moderateCount = (response.match(redFlags.moderate) || []).length;
+    const mildCount = (response.match(redFlags.mild) || []).length;
     
-    // Add small randomness
-    score += Math.random() * 0.05;
+    score -= severeCount * 0.3;
+    score -= moderateCount * 0.2;
+    score -= mildCount * 0.1;
     
-    return Math.max(0, Math.min(1, score));
+    // Sentence structure variety
+    const sentences = response.split(/[.!?]+/).filter(Boolean);
+    const avgSentenceLength = sentences.reduce((sum, sent) => sum + sent.length, 0) / sentences.length;
+    const sentenceLengthVariance = sentences.reduce((sum, sent) => sum + Math.abs(sent.length - avgSentenceLength), 0) / sentences.length;
+    
+    // Reward varied sentence structure
+    score += Math.min(0.3, sentenceLengthVariance / 20);
+    
+    // Emotional content
+    const emotionalWords = new Set(response.match(/\b(happy|excited|love|enjoy|great|wonderful|amazing)\b/gi) || []);
+    score += Math.min(0.2, emotionalWords.size * 0.05);
+    
+    // Add small controlled randomness
+    score += (Math.random() * 0.1) - 0.05;
+    
+    // Normalize score to 0-1 range with sigmoid function
+    return 1 / (1 + Math.exp(-score));
 }
 
 function backpropagate(node: Node, score: number) {
@@ -96,16 +119,45 @@ function backpropagate(node: Node, score: number) {
     }
 }
 
-export function selectBestResponse(responses: string[]): string {
-    if (responses.length === 0) return '';
-    if (responses.length === 1) return responses[0];
+function calculateResponseStatus(ratio: number): string {
+    if (ratio >= 0.9) return 'good';
+    if (ratio >= 0.7) return 'okay';
+    if (ratio > 0) return 'bad';
+    return 'error';
+}
+
+interface SelectBestResponseResult {
+    bestResponse: {
+        response: string;
+        score: number;
+        model: string;
+        responseId: string;
+    };
+    allResponses: {
+        response: string;
+        ratio: number;
+        status: string;
+        model: string;
+        responseId: string;
+    }[];
+}
+
+export function selectBestResponse(responses: ResponseFormat[]): SelectBestResponseResult {
+    if (responses.length === 0) return { bestResponse: { response: '', score: 0, model: '', responseId: responses[0].responseId }, allResponses: [] };
+    if (responses.length === 1) return { bestResponse: { response: responses[0].response, score: 1, model: responses[0].modelName || '', responseId: responses[0].responseId }, allResponses: [{ response: responses[0].response, ratio: 1, status: 'best', model: responses[0].modelName || '', responseId: responses[0].responseId }] };
     
+    console.log('best response', responses);
     // Create root node
-    const root = createNode('root');
+    const root = createNode('root', null, '', '');
     
     // Create child nodes for each response
     responses.forEach(response => {
-        root.children.push(createNode(response, root));
+        root.children.push(createNode(
+            response.response, 
+            root, 
+            response.modelName,
+            response.responseId
+        ));
     });
     
     // Run MCTS for a fixed number of iterations
@@ -121,14 +173,30 @@ export function selectBestResponse(responses: string[]): string {
         backpropagate(selectedNode, score);
     }
     
-    // Select the best child based on average score
+    // Calculate scores for all children
+    const scoredResponses = root.children.map(child => ({
+        response: child.response,
+        ratio: child.score / (child.visits || 1),
+        status: calculateResponseStatus(child.score / (child.visits || 1)),
+        model: child.modelName,
+        responseId: child.responseId
+    }));
+
+
+    // Find best child based on average score
     const bestChild = root.children.reduce((best, child) => {
         const avgScore = child.score / (child.visits || 1);
         const bestAvgScore = best.score / (best.visits || 1);
         return avgScore > bestAvgScore ? child : best;
     }, root.children[0]);
-
-    console.log(bestChild);
     
-    return bestChild.response;
+    return {
+        bestResponse: { 
+            response: bestChild.response, 
+            score: bestChild.score, 
+            model: bestChild.modelName,
+            responseId: bestChild.responseId
+        },
+        allResponses: scoredResponses
+    };
 }

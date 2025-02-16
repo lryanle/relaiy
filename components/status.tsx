@@ -10,11 +10,11 @@ export default function Status({ status, size = "sm" }: Readonly<StatusProps>) {
 
   const statusColor = (status: StatusType) => {
     switch (status) {
-      case "Active":
+      case "active":
         return "bg-green-500";
-      case "Inactive":
+      case "inactive":
         return "bg-amber-500";
-      case "Complete":
+      case "complete":
         return "bg-slate-500";
     }
   };
@@ -34,7 +34,7 @@ export default function Status({ status, size = "sm" }: Readonly<StatusProps>) {
 
   return (
     <span className={`relative flex ${statusSize(size)}`}>
-      <span style={{ animationDuration: "2s" }} className={`absolute inline-flex h-full w-full ${status === "Active" ? "animate-ping" : ""} rounded-full ${statusColor(status)} opacity-75`}></span>
+      <span style={{ animationDuration: "2s" }} className={`absolute inline-flex h-full w-full ${status === "active" ? "animate-ping" : ""} rounded-full ${statusColor(status)} opacity-75`}></span>
       <span className={`relative inline-flex ${statusSize(size)} rounded-full ${statusColor(status)}`}></span>
     </span>
   );

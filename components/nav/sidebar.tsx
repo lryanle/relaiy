@@ -3,68 +3,68 @@
 import { Icons } from "@/components/icons";
 import NavItem from "@/components/nav/navitem";
 import Status from "@/components/status";
-import { formatReceipientId, formatTimeAgo } from "@/lib/utils";
+import { formatReceipientId, formatTimeAgo, getChatsForUser } from "@/lib/utils";
 import { routes } from "@/routing";
-import { CAgent } from "@/types/types";
+import { ChatTab } from "@/types/chat";
+import { useQuery } from "@tanstack/react-query";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 //! TODO: CONNECT TO ROUTE
-import { Button } from "@/components/ui/button";
 
 
 
-const activeCagents: CAgent[] = [
-  {
-    status: "Active",
-    type: "Voice",
-    receipientId: "4057194190",
-    id: "1",
-    recentActivity: new Date(),
-  },
-  {
-    status: "Inactive",
-    type: "SMS",
-    receipientId: "4057194190",
-    id: "2",
-    recentActivity: new Date(Date.now() - 1000 * 60 * 2),
-  },
-  {
-    status: "Complete",
-    type: "Voice",
-    receipientId: "4057194190",
-    id: "3",
-    recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
-  },
-  {
-    status: "Active",
-    type: "Voice",
-    receipientId: "4057194190",
-    id: "4",
-    recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
-  },
-  {
-    status: "Active",
-    type: "Voice",
-    receipientId: "4057194190",
-    id: "5",
-    recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
-  },
-  {
-    status: "Active",
-    type: "Voice",
-    receipientId: "4057194190",
-    id: "6",
-    recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
-  },
-  {
-    status: "Active",
-    type: "Voice",
-    receipientId: "4057194190",
-    id: "7",
-    recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
-  },
-];
+// const activeCagents: CAgent[] = [
+//   {
+//     status: "Active",
+//     type: "Voice",
+//     receipientId: "4057194190",
+//     id: "1",
+//     recentActivity: new Date(),
+//   },
+//   {
+//     status: "Inactive",
+//     type: "SMS",
+//     receipientId: "4057194190",
+//     id: "2",
+//     recentActivity: new Date(Date.now() - 1000 * 60 * 2),
+//   },
+//   {
+//     status: "Complete",
+//     type: "Voice",
+//     receipientId: "4057194190",
+//     id: "3",
+//     recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
+//   },
+//   {
+//     status: "Active",
+//     type: "Voice",
+//     receipientId: "4057194190",
+//     id: "4",
+//     recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
+//   },
+//   {
+//     status: "Active",
+//     type: "Voice",
+//     receipientId: "4057194190",
+//     id: "5",
+//     recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
+//   },
+//   {
+//     status: "Active",
+//     type: "Voice",
+//     receipientId: "4057194190",
+//     id: "6",
+//     recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
+//   },
+//   {
+//     status: "Active",
+//     type: "Voice",
+//     receipientId: "4057194190",
+//     id: "7",
+//     recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
+//   },
+// ];
 
 export default function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -73,6 +73,10 @@ export default function Sidebar() {
     setIsMobileMenuOpen(false);
   }
 
+  const { data: chats, isLoading } = useQuery({
+    queryKey: ["chats"],
+    queryFn: getChatsForUser,
+  })
 
   return (
     <>
@@ -138,28 +142,30 @@ export default function Sidebar() {
                 </div>
               </div>
 
+                {chats && chats.length > 0 && (
               <div>
                 <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                   Recent C-Agents
                 </div>
                 <div className="space-y-1">
-                  {activeCagents.map((cagent) => (
+                  {chats?.map((cagent: ChatTab) => (
                     <Link
-                      key={cagent.id + cagent.type + cagent.status + cagent.receipientId + cagent.recentActivity}
-                      href={`/?id=${cagent.id}`}
-                      className="gap-4 w-full flex justify-start items-center px-3 py-1 text-sm rounded-md transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
+                      key={cagent.id + cagent.type + cagent.status + cagent.recipient_address}
+                      href={`/chat/${cagent.id}`}
+                      className="gap-4 animate-in fade-in-0 duration-300 w-full flex justify-start items-center px-3 py-1 text-sm rounded-md transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
                     >
-                      <Status status={cagent.status} />
+                      <Status status={cagent.status } />
                       <div className="flex flex-col items-start">
                         <div className="flex items-center gap-2">
-                          {formatReceipientId(cagent.receipientId, cagent.type)}
+                          {formatReceipientId(cagent.recipient_address, cagent.type)}
                         </div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">{`${cagent.type.toUpperCase()} • active ${formatTimeAgo(cagent.recentActivity)}`}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{`${cagent.type.toUpperCase()} • ${cagent.status.charAt(0).toUpperCase() + cagent.status.slice(1)} ${formatTimeAgo(new Date(cagent.last_activity))}`}</span>
                       </div>
                     </Link>
                   ))}
-                </div>
-              </div>
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
 

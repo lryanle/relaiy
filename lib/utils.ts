@@ -176,3 +176,25 @@ export function isValidDestination(destination: string, type: Channel): boolean 
   }
   return false;
 }
+
+export function getProviderIconFromModel(model: string) {
+  if (model.includes("openai") || model.includes("gpt") || model.includes("4o") || model.includes("3o") || model.includes("o1")) {
+    return "/llmproviders/openai.svg"
+  } else if (model.includes("anthropic") || model.includes("claude")) {
+    return "/llmproviders/anthropic.svg"
+  } else if (model.includes("groq")) {
+    return "/llmproviders/groq.svg"
+  } else if (model.includes("gemini") || model.includes("google")) {
+    return "/llmproviders/google.svg"
+  } else if (model.includes("aws") || model.includes("bedrock")) {
+    return "/llmproviders/aws.svg"
+  } else if (model.includes("deepseek")) {
+    return "/llmproviders/deepseek.svg"
+  } else if (model.includes("llama") || model.includes("meta")) {
+    return "/llmproviders/meta.svg"
+  } else if (model.includes("mistral")) {
+    return "/llmproviders/mistral.svg"
+  } else {
+    return "/llmproviders/openai.svg"
+  }
+}

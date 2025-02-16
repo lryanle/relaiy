@@ -6,7 +6,7 @@ import { DataTable } from "@/components/table/data-table"
 import Spinner from "@/components/ui/spinner"
 import { useWebSocket } from "@/lib/context/websocket-provider"
 import { getChatsForUser } from "@/lib/utils"
-import { Conversation } from "@/types/types"
+import { Conversation, StateStatus } from "@/types/types"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 
@@ -714,9 +714,9 @@ export default function Home() {
         onRowClick={setSelectedConvo}
         selectedConvo={selectedConvo}
       />
-      {selectedConvo && <InspectAgent setSelectedConvo={setSelectedConvo} selectedConvo={selectedConvo} states={Object.values(dataPoints).map(state => ({
+      {selectedConvo && <InspectAgent setSelectedConvo={setSelectedConvo} selectedConvo={selectedConvo} states={states.map(state => ({
         ...state,
-        status: getStatusFromScore(state.score)
+        status: state.status.toLowerCase() as StateStatus
       }))} />}
     </div>
   )

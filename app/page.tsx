@@ -683,6 +683,10 @@ export default function Home() {
     )
   }
 
+  const maxScore = Math.max(...Object.values(dataPoints).map(state => state.score))
+  const minScore = Math.min(...Object.values(dataPoints).map(state => state.score))
+  console.log(maxScore, minScore) 
+
   return (
     <div className="p-4 container mx-auto flex flex-col md:flex-row gap-4 justify-center items-start">
       <DataTable 
@@ -691,7 +695,8 @@ export default function Home() {
       />
       <InspectAgent states={Object.values(dataPoints).map(state => ({
         ...state,
-        status: state.status.toLowerCase() as StateStatus
+        status: state.status.toLowerCase() as StateStatus,
+        score: (state.score) / (maxScore)
       }))} />
     </div>
   )

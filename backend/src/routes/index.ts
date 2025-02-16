@@ -9,8 +9,6 @@ const createChatSchema = z.object({
     firstMessage: z.string(),
     destination: z.string(),
     type: z.enum(['SMS', 'VOICE', 'EMAIL']),
-    tones: z.array(z.string()),
-    requirements: z.array(z.string())
 });
 
 const index = Router();

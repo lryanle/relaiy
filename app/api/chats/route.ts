@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server"
-import { Chat } from "@/types/chat"
 import { auth } from "@/lib/auth"
+import prisma from "@/lib/prisma"
 
-export async function GET(
-    request: Request,
-) {
+export async function GET(request: Request) {
     try {
         const session = await auth.api.getSession({
             headers: request.headers
@@ -13,28 +11,42 @@ export async function GET(
         if (!session) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
-    
-        console.log(session)    
-    
-        const body = await request.json()
-        const { userId } = body
-    
-        if (!userId) {
-            return NextResponse.json({ error: "User ID is required" }, { status: 400 })
-        }
-        // Fetch chats for the user from your database
-        const response = await fetch(`https://api.relaiy.tech/chats/${userId}`)
-        const data = await response.json()
 
-        // Map the response to match our schema
-        const chats: Chat[] = data.map((chat: any) => ({
-            status: chat.status,
-            type: chat.type,
-            recipient_address: chat.recipient_address,
-            last_activity: new Date(chat.last_activity),
-            message_count: chat.message_count,
-            total_price: chat.total_price
+        // Get all chat threads for the user
+        const chatThreads = await prisma.chatThread.findMany({
+            where: {
+                userId: session.user.id
+            },
+            include: {
+                ChatMessage: {
+                    orderBy: {
+                        timestamp: 'desc'
+                    },
+                    take: 1 // Get latest message
+                },
+                _count: {
+                    select: { ChatMessage: true } // Get message count
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        })
+
+        // Map to response format
+        const chats = chatThreads.map(thread => ({
+            id: thread.id,
+            status: thread.status.toLowerCase(),
+            type: thread.type.toLowerCase(),
+            recipient_address: thread.destination,
+            last_activity: thread.ChatMessage[0]?.timestamp ?? thread.createdAt,
+            message_count: thread._count.ChatMessage,
+            goal: thread.goal,
+            requirements: thread.requirements,
+            tones: thread.tones
         }))
+
+        console.log(chats) 
 
         return NextResponse.json(chats)
     } catch (error) {

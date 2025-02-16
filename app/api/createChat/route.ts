@@ -7,8 +7,10 @@ type CreateChatPayload = {
     userId: string
     goal: string
     firstMessage: string
-    address: string
     type: string
+    tones: string[]
+    requirements: string[]
+    destination: string
 }
 
 export async function POST(request: Request) {
@@ -20,15 +22,13 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    console.log(session)    
-
     const body = await request.json() as CreateChatPayload
-    const { userId, goal, firstMessage, address, type } = body
+    const { goal, firstMessage, destination, type, tones, requirements } = body
 
-    if (!userId || !goal || !firstMessage || !address || !type) {
+    if (!goal || !firstMessage || !destination || !type || !tones || !requirements) {
         return NextResponse.json({ 
             error: "Missing required fields", 
-            required: ["userId", "goal", "firstMessage", "address", "type"]
+            required: ["goal", "firstMessage", "address", "type"]
         }, { status: 400 })
     }
 
@@ -51,15 +51,17 @@ export async function POST(request: Request) {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            userId,
+            userId: session.user.id,
             goal,
             firstMessage,
-            address,
-            type
+            destination,
+            type,
+            tones,
+            requirements
         })
     })
 
-    console.log(response)
+    console.log(response)   
 
     if (!response.ok) {
         return NextResponse.json({ 

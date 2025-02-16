@@ -15,7 +15,7 @@ twilioRouter.post('/',
 
         const chat = await db.chatThread.findFirst({
             where: {
-                destination: From.replace('whatsapp:', '')
+                destination: From.replace('whatsapp:+1', '')
             },
             orderBy: {
                 createdAt: 'desc'

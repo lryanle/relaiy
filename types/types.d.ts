@@ -16,3 +16,14 @@ export type CAgent = {
     type: Channel;
     receipientId: string
 }
+
+export type Conversation = {
+    id: string
+    status: Status
+    channel: Channel
+    recipient: string
+    goal: string
+    lastActivity: Date
+    messageCount: number
+    totalPrice: number
+  }

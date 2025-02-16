@@ -30,12 +30,6 @@ export const routes: Route[] = [
     group: "Modifications",
   },
   {
-    name: "Documentation",
-    icon: BookText,
-    href: "/documentation",
-    group: "Modifications",
-  },
-  {
     name: "Settings",
     icon: Settings,
     href: "/settings",

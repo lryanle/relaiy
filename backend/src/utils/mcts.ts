@@ -7,6 +7,7 @@ interface Node {
     parent: Node | null;
     modelName: string;
     responseId: string;
+    extraPoints?: number;
 }
 
 function createNode(response: string, parent: Node | null = null, modelName: string, responseId: string): Node {
@@ -43,11 +44,16 @@ function select(node: Node): Node {
     return current;
 }
 
-function simulate(response: string): number {
-    let score = 0;
+function simulate(node: Node): number {
+    let score = node.extraPoints || 0;
+    
+    // Add extraPoints to base score
+    if (node.extraPoints) {
+        score += (node.extraPoints - 1) * 0.25; // Scale 1-4 to 0-0.75 bonus
+    }
     
     // Base score from length (more granular scaling)
-    const length = response.length;
+    const length = node.response.length;
     if (length >= 50 && length <= 120) {
         score += 0.5;
     } else if (length >= 30 && length <= 150) {
@@ -57,15 +63,15 @@ function simulate(response: string): number {
     }
     
     // Personality scoring (weighted by count)
-    const personalityWords = (response.match(/\b(I|me|my|mine)\b/gi) || []).length;
+    const personalityWords = (node.response.match(/\b(I|me|my|mine)\b/gi) || []).length;
     score += Math.min(0.3, personalityWords * 0.1);
     
     // Natural conversation markers (weighted by variety)
-    const conversationMarkers = new Set(response.match(/\b(hey|oh|well|so|actually|yeah|cool|nice)\b/gi) || []);
+    const conversationMarkers = new Set(node.response.match(/\b(hey|oh|well|so|actually|yeah|cool|nice)\b/gi) || []);
     score += Math.min(0.3, conversationMarkers.size * 0.08);
     
     // Question engagement (scaled penalty)
-    const questionCount = (response.match(/\?/g) || []).length;
+    const questionCount = (node.response.match(/\?/g) || []).length;
     if (questionCount === 1) {
         score += 0.3;
     } else if (questionCount > 1) {
@@ -73,7 +79,7 @@ function simulate(response: string): number {
     }
     
     // Engagement words (weighted by variety)
-    const engagementWords = new Set(response.match(/\b(fun|hang|coffee|meet|date|together|chat|talk)\b/gi) || []);
+    const engagementWords = new Set(node.response.match(/\b(fun|hang|coffee|meet|date|together|chat|talk)\b/gi) || []);
     score += Math.min(0.4, engagementWords.size * 0.1);
     
     // Red flags (weighted by severity and count)
@@ -83,16 +89,16 @@ function simulate(response: string): number {
         mild: /\b(system|process|function|execute)\b/gi
     };
     
-    const severeCount = (response.match(redFlags.severe) || []).length;
-    const moderateCount = (response.match(redFlags.moderate) || []).length;
-    const mildCount = (response.match(redFlags.mild) || []).length;
+    const severeCount = (node.response.match(redFlags.severe) || []).length;
+    const moderateCount = (node.response.match(redFlags.moderate) || []).length;
+    const mildCount = (node.response.match(redFlags.mild) || []).length;
     
     score -= severeCount * 0.3;
     score -= moderateCount * 0.2;
     score -= mildCount * 0.1;
     
     // Sentence structure variety
-    const sentences = response.split(/[.!?]+/).filter(Boolean);
+    const sentences = node.response.split(/[.!?]+/).filter(Boolean);
     const avgSentenceLength = sentences.reduce((sum, sent) => sum + sent.length, 0) / sentences.length;
     const sentenceLengthVariance = sentences.reduce((sum, sent) => sum + Math.abs(sent.length - avgSentenceLength), 0) / sentences.length;
     
@@ -100,13 +106,13 @@ function simulate(response: string): number {
     score += Math.min(0.3, sentenceLengthVariance / 20);
     
     // Emotional content
-    const emotionalWords = new Set(response.match(/\b(happy|excited|love|enjoy|great|wonderful|amazing)\b/gi) || []);
+    const emotionalWords = new Set(node.response.match(/\b(happy|excited|love|enjoy|great|wonderful|amazing)\b/gi) || []);
     score += Math.min(0.2, emotionalWords.size * 0.05);
     
     // Add small controlled randomness
     score += (Math.random() * 0.1) - 0.05;
     
-    // Normalize score to 0-1 range with sigmoid function
+    // Normalize final score
     return 1 / (1 + Math.exp(-score));
 }
 
@@ -168,7 +174,7 @@ export function selectBestResponse(responses: ResponseFormat[]): SelectBestRespo
         const selectedNode = select(root);
         
         // Simulation
-        const score = simulate(selectedNode.response);
+        const score = simulate(selectedNode);
         
         // Backpropagation
         backpropagate(selectedNode, score);

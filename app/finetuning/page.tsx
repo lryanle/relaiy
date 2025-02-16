@@ -144,9 +144,15 @@ export default function FineTuning() {
         <CardHeader>
           <CardTitle className="text-2xl font-bold flex items-center justify-between w-full gap-2">
             <span className="text-gray-900 dark:text-gray-100">Fine-Tuning Settings</span>
-            <Link href="/settings">
-              <Button variant="outline" className="gap-2">
-                <span>LLM Settings</span>
+            <Link href="/settings" onClick={(e) => {
+              e.preventDefault()
+              toast({
+                title: "LLM Config Feature WIP",
+                description: "LLM editing is coming soon!",
+              })
+            }}>
+              <Button variant="outline" className="gap-2" disabled>
+                <span>LLM Settings (WIP)</span>
                 <ArrowRightIcon className="w-4 h-4" />
               </Button>
             </Link>

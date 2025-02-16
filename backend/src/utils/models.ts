@@ -22,13 +22,14 @@ const createModel = (config: {
         input: number;
         output: number;
     };
+    onCallModel?: boolean;
 }) => ({
     model: config.provider === 'deepseek' || config.provider === 'openrouter' 
         ? new ChatOpenAI({
             openAIApiKey: config.apiKey,
             modelName: config.modelName,
-            temperature: 0.8,
-            maxTokens: 1000,
+            temperature: 0.4,
+            maxTokens: 1200,
             configuration: {
                 baseURL: config.provider === 'openrouter' ? 'https://openrouter.ai/api/v1' : 'https://api.deepseek.com/v1',
             },
@@ -48,7 +49,8 @@ const createModel = (config: {
     price: {
         input: config.price?.input ?? 0,
         output: config.price?.output ?? 0,
-    }
+    },
+    onCallModel: config.onCallModel ?? false
 });
 
 // Initialize models
@@ -65,11 +67,11 @@ export const models = {
 
     aion_labs_1_mini: createModel({
         provider: 'openrouter',
-        modelName: 'aion-labs/aion-1.0-mini',
+        modelName: 'aion-labs/aion-1.0',
         apiKey: process.env.OPENROUTER_API_KEY!,
         price: {
-            input: 0.7,
-            output: 1.4
+            input: 4,
+            output: 8
         }
     }),
     gpt4oMini: createModel({
@@ -89,7 +91,8 @@ export const models = {
         price: {
             input: 0.035,
             output: 0.14
-        }
+        },
+        onCallModel: true
     }),
 
     claude_3_5_haiku: createModel({
@@ -108,7 +111,8 @@ export const models = {
         price: {
             input: 0.075,
             output: 0.30
-        }
+        },
+        onCallModel: true
     }),
 
     mistral: createModel({
@@ -118,7 +122,8 @@ export const models = {
         price: {
             input: 0.3,
             output: 0.9
-        }
+        },
+        onCallModel: true
     }),
 
     cohere: createModel({
@@ -128,7 +133,8 @@ export const models = {
         price: {
             input: 0.075,
             output: 0.30
-        }
+        },
+        onCallModel: true
     }),
 
     perplexity_sonar_small: createModel({
@@ -143,11 +149,11 @@ export const models = {
 
     qwen_deepseek_r1_distill: createModel({
         provider: 'openrouter',
-        modelName: 'deepseek/deepseek-r1-distill-qwen-14b',
+        modelName: 'qwen/qwen-turbo',
         apiKey: process.env.OPENROUTER_API_KEY!,
         price: {
-            input: 1.6,
-            output: 1.6
+            input: 0.05,
+            output: 0.2
         }
     }),
 };

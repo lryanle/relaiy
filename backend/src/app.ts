@@ -143,6 +143,7 @@ app.ws('/llm-websocket/:call_id', async (ws, req) => {
     ws.on('message', (message) => {
         try {
             const request: RetellRequest = JSON.parse(message.toString());
+            console.log(request);
             if (request.interaction_type !== 'response_required') return;            
             // Format message for wsMessage handler
             const formattedMessage = JSON.stringify({
@@ -157,7 +158,7 @@ app.ws('/llm-websocket/:call_id', async (ws, req) => {
 
 
             // Process message using existing handler
-            wsMessage(ws, formattedMessage);
+            wsMessage(ws, formattedMessage, true);
             
         } catch (error) {
             console.error('Error parsing message:', error);

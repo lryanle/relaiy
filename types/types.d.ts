@@ -19,12 +19,25 @@ export type CAgent = {
 }
 
 export type Conversation = {
-    id: string
-    status: Status
-    channel: Channel
-    recipient: string
-    goal: string
-    lastActivity: Date
-    messageCount: number
-    totalPrice: number
+  id: string
+  status: Status
+  channel: Channel
+  recipient: string
+  goal: string
+  lastActivity: Date
+  messageCount: number
+  totalPrice: number
+}
+
+export type Transaction = {
+  id: string
+  timestamp: Date
+  model: string
+  cost: number
+  tokens: {
+    input: number
+    output: number
   }
+  type: string
+  status?: string
+}

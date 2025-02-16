@@ -55,7 +55,7 @@ function parseModelResponse(content: string): ResponseFormat[] {
     }
 }
 
-export const wsMessage = async (ws: WebSocket, message: string) => {
+export const wsMessage = async (ws: WebSocket, message: string, onCall = false) => {
     try {
         const parsedMessage = messageSchema.safeParse(JSON.parse(message));
 
@@ -72,8 +72,21 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
             where: { id: parsedMessage.data.chatId }
         });
 
+        const account = await db.account.findFirst({
+            where: { 
+                id: thread?.userId
+            }
+        });
+
         if (!thread) {
             ws.send(JSON.stringify({ error: 'Thread not found' }));
+            console.error('Thread not found');
+            return;
+        }
+
+        if (!account) {
+            ws.send(JSON.stringify({ error: 'Account not found' }));
+            console.error('Account not found');
             return;
         }
         
@@ -84,9 +97,9 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
 
         const prompt = createPrompt({
             goal: thread.goal,
-            tone: thread.tones.join(', '),
+            tone: account.tones,
             history: [...history, { role: 'user' as const, content: parsedMessage.data.message }],
-            requirements: thread.requirements,
+            requirements: account.requirements,
             profileInfomation: {
                 name: 'Duy',
                 age: 20,
@@ -114,6 +127,7 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
         const modelUsage: Record<string, { input: number; output: number; cost: number }> = {};
 
         await Promise.all(Object.entries(models).map(async ([modelName, model]) => {
+            if (onCall && !model.onCallModel) return;
             try {
                 const result = await model.model.invoke([{
                     role: 'user',
@@ -131,8 +145,7 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
                             cost: ((result.usage_metadata.input_tokens * model.price.input) + 
                                    (result.usage_metadata.output_tokens * model.price.output)) / 1_000_000
                         };
-                    }
-;
+                    };
                     // Send responses with IDs
                     if (parsedResponses.length > 0) {
                         parsedResponses.forEach((response, index) => {
@@ -184,6 +197,70 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
 
         // Calculate scores and status for all responses
         if (responses.length > 0) {
+            // New code to get extra points from Gemini
+            const geminiScoringPrompt = `Rate each response with a float value from 1.0 to 4.0 based on these criteria:
+            1.0-1.9 = Poor/Inappropriate
+            2.0-2.9 = Basic/Acceptable
+            3.0-3.9 = Good/Natural
+            4.0 = Excellent/Engaging
+
+            Consider:
+            - Natural human conversation style
+            - Appropriate emotional tone
+            - Engagement level
+            - Authenticity
+            - Relevance to context
+            - Follows the conversation history
+
+            Conversation History:
+            ${history.map((h, i) => `${i + 1}. ${h.role}: ${h.content}`).join('\n')}
+
+            Last Message:
+            ${parsedMessage.data.message}
+
+            Responses to rate:
+            ${responses.map((r, i) => `${i + 1}. ${r.response}`).join('\n')}
+
+            Return ONLY a JSON array in this exact format, with float scores:
+            [
+              {"responseId": "response-id-here", "extraPoints": 3.5},
+              {"responseId": "another-id", "extraPoints": 2.8}
+            ]`;
+
+            try {
+                const geminiScoring = await models.gemini.model.invoke([{
+                    role: 'user',
+                    content: geminiScoringPrompt
+                }]) as { content: string };
+
+                // Extract JSON from code block if present
+                const jsonMatch = geminiScoring.content.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/) || 
+                                 geminiScoring.content.match(/(\[[\s\S]*?\])/);
+                
+                const jsonContent = jsonMatch ? jsonMatch[1] : geminiScoring.content;
+                const scoredResponses = JSON.parse(jsonContent) as Array<{
+                    responseId: string;
+                    extraPoints: number;
+                }>;
+                
+                // Add extra points to responses
+                responses.forEach(response => {
+                    const score = scoredResponses.find(s => s.responseId === response.responseId);
+                    if (score) {
+                        response.extraPoints = score.extraPoints;
+                    }
+                });
+            } catch (error) {
+                console.error('Error getting Gemini scores:', error);
+                // Set default extraPoints if Gemini scoring fails
+                responses.forEach(response => {
+                    response.extraPoints = 2.5; // Default middle score as float
+                });
+            }
+
+
+            console.log('responses', responses);
+
             const bestResponse = selectBestResponse(responses);
             
             // Require at least 2 responses for completion voting
@@ -209,9 +286,9 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
                             threadId: parsedMessage.data.chatId,
                             content: bestResponse.bestResponse.response,
                             sender: 'ASSISTANT',
-                            inputTokenUsage: totalInputTokens,
-                            outputTokenUsage: totalOutputTokens,
-                            cost: totalCost,
+                            inputTokenUsage: totalInputTokens ?? 0,
+                            outputTokenUsage: totalOutputTokens ?? 0,
+                            cost: totalCost ?? 0,
                             modelName: Object.keys(modelUsage).join(',') // Store all models used
                         }
                     ]

@@ -4,10 +4,9 @@ type Size = "xs" | "sm" | "md" | "lg";
 interface StatusProps {
   status: StatusType;
   size?: Size;
-  speed?: number;
 }
 
-export default function Status({ status, size = "sm", speed = 5000 }: Readonly<StatusProps>) {
+export default function Status({ status, size = "sm" }: Readonly<StatusProps>) {
 
   const statusColor = (status: StatusType) => {
     switch (status) {
@@ -35,7 +34,7 @@ export default function Status({ status, size = "sm", speed = 5000 }: Readonly<S
 
   return (
     <span className={`relative flex ${statusSize(size)}`}>
-      <span style={{ animationDelay: `${speed}ms` }} className={`absolute inline-flex h-full w-full animate-ping rounded-full ${statusColor(status)} opacity-75`}></span>
+      <span style={{ animationDuration: "2s" }} className={`absolute inline-flex h-full w-full ${status === "Active" ? "animate-ping" : ""} rounded-full ${statusColor(status)} opacity-75`}></span>
       <span className={`relative inline-flex ${statusSize(size)} rounded-full ${statusColor(status)}`}></span>
     </span>
   );

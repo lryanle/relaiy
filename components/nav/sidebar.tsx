@@ -1,20 +1,70 @@
 "use client";
 
-import {
-  Wallet,
-  Users2,
-  Settings,
-  HelpCircle,
-  Menu,
-  ChartArea,
-  BookText,
-  Settings2,
-} from "lucide-react";
-
-import { Home } from "lucide-react";
+import { Menu } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Icons } from "@/components/icons";
+import { routes } from "@/routing";
+import { CAgent } from "@/types/types";
+import NavItem from "@/components/nav/navitem";
+import { formatReceipientId, formatTimeAgo } from "@/lib/utils";
+import Status from "@/components/status";
+//! TODO: CONNECT TO ROUTE
+import { Button } from "@/components/ui/button";
+
+
+
+const activeCagents: CAgent[] = [
+  {
+    status: "Active",
+    type: "Voice",
+    receipientId: "4057194190",
+    id: "1",
+    recentActivity: new Date(),
+  },
+  {
+    status: "Active",
+    type: "SMS",
+    receipientId: "4057194190",
+    id: "2",
+    recentActivity: new Date(Date.now() - 1000 * 60 * 2),
+  },
+  {
+    status: "Active",
+    type: "Voice",
+    receipientId: "4057194190",
+    id: "3",
+    recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
+  },
+  {
+    status: "Active",
+    type: "Voice",
+    receipientId: "4057194190",
+    id: "4",
+    recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
+  },
+  {
+    status: "Active",
+    type: "Voice",
+    receipientId: "4057194190",
+    id: "5",
+    recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
+  },
+  {
+    status: "Active",
+    type: "Voice",
+    receipientId: "4057194190",
+    id: "6",
+    recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
+  },
+  {
+    status: "Active",
+    type: "Voice",
+    receipientId: "4057194190",
+    id: "7",
+    recentActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
+  },
+];
 
 export default function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -23,26 +73,6 @@ export default function Sidebar() {
     setIsMobileMenuOpen(false);
   }
 
-  function NavItem({
-    href,
-    icon: Icon,
-    children,
-  }: {
-    href: string;
-    icon: any;
-    children: React.ReactNode;
-  }) {
-    return (
-      <Link
-        href={href}
-        onClick={handleNavigation}
-        className="flex items-center px-3 py-2 text-sm rounded-md transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
-      >
-        <Icon className="h-4 w-4 mr-3 flex-shrink-0" />
-        {children}
-      </Link>
-    );
-  }
 
   return (
     <>
@@ -61,25 +91,24 @@ export default function Sidebar() {
             `}
       >
         <div className="h-full flex flex-col">
-          <div className="flex items-center justify-between">
-            <Link
-              href="https://relaiy.tech/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="h-16 w-full px-6 flex items-center border-b border-gray-200 dark:border-[#1F1F23]"
-            >
-              <div className="flex items-center gap-3">
-                <Icons.Logo
-                  className="flex-shrink-0 hidden dark:block"
-                  width={40}
-                  height={40}
-                />
-                <span className="text-lg font-semibold hover:cursor-pointer text-gray-900 dark:text-white">
-                  relaiy
-                </span>
-              </div>
-            </Link>
-          </div>
+        <div
+          className="h-16 w-full pl-6 pr-2 flex justify-between items-center border-b border-gray-200 dark:border-[#1F1F23]"
+        >
+          <Link
+            href="/"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3"
+           >
+            <Icons.Logo
+              className="flex-shrink-0 hidden dark:block"
+              width={40}
+              height={40}
+            />
+            <span className="text-lg font-semibold hover:cursor-pointer text-gray-900 dark:text-white">
+              relaiy
+            </span>
+          </Link>
+        </div>
 
           <div className="flex-1 overflow-y-auto py-4 px-4">
             <div className="space-y-6">
@@ -88,15 +117,11 @@ export default function Sidebar() {
                   Overview
                 </div>
                 <div className="space-y-1">
-                  <NavItem href="#" icon={Home}>
-                    Dashboard
-                  </NavItem>
-                  <NavItem href="#" icon={ChartArea}>
-                    Analytics
-                  </NavItem>
-                  <NavItem href="#" icon={Wallet}>
-                    Usage
-                  </NavItem>
+                  {routes.filter((route) => route.group === "Overview").map((route) => (
+                    <NavItem key={route.name} href={route.href} icon={route.icon} handleNavigation={handleNavigation}>
+                      {route.name}
+                    </NavItem>
+                  ))}
                 </div>
               </div>
 
@@ -105,24 +130,35 @@ export default function Sidebar() {
                   Modifications
                 </div>
                 <div className="space-y-1">
-                  <NavItem href="#" icon={Settings2}>
-                    Fine-tuning
-                  </NavItem>
-                  <NavItem href="#" icon={BookText}>
-                    Documentation
-                  </NavItem>
+                  {routes.filter((route) => route.group === "Modifications").map((route) => (
+                    <NavItem key={route.name} href={route.href} icon={route.icon} handleNavigation={handleNavigation}>
+                      {route.name}
+                    </NavItem>
+                  ))}
                 </div>
               </div>
 
               <div>
                 <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Active C-Agents
+                  Recent C-Agents
                 </div>
                 <div className="space-y-1">
-                  <NavItem href="#" icon={Users2}>
-                    C-Agent Here 
-                    {/* TODO: @Ryan */}
-                  </NavItem>
+                  {activeCagents.map((cagent) => (
+                    <Button
+                      key={cagent.id + cagent.type + cagent.status + cagent.receipientId + cagent.recentActivity}
+                      onClick={handleNavigation}
+                      variant="ghost"
+                      className="gap-4 w-full flex justify-start items-center px-3 py-2 text-sm rounded-md transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
+                    >
+                      <Status status="Active" />
+                      <div className="flex flex-col items-start">
+                        <div className="flex items-center gap-2">
+                          {formatReceipientId(cagent.receipientId, cagent.type)}
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{`${cagent.type.toUpperCase()} • active ${formatTimeAgo(cagent.recentActivity)}`}</span>
+                      </div>
+                    </Button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -130,12 +166,11 @@ export default function Sidebar() {
 
           <div className="px-4 py-4 border-t border-gray-200 dark:border-[#1F1F23]">
             <div className="space-y-1">
-              <NavItem href="#" icon={Settings}>
-                Settings
-              </NavItem>
-              <NavItem href="#" icon={HelpCircle}>
-                Help
-              </NavItem>
+              {routes.filter((route) => route.group === "Settings").map((route) => (
+                <NavItem key={route.name} href={route.href} icon={route.icon} handleNavigation={handleNavigation}>
+                  {route.name}
+                </NavItem>
+              ))}
             </div>
           </div>
         </div>

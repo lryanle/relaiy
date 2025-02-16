@@ -68,9 +68,9 @@ export default function FineTuning() {
       <Card className="w-full max-w-3xl">
         <CardHeader>
           <CardTitle className="text-2xl font-bold flex items-center justify-between w-full gap-2">
-            <span className="text-gray-500">Fine-Tuning Settings</span>
+            <span className="text-gray-900 dark:text-gray-100">Fine-Tuning Settings</span>
             <Link href="/settings">
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" className="gap-2">
                 <span>LLM Settings</span>
                 <ArrowRightIcon className="w-4 h-4" />
               </Button>

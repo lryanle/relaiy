@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/hooks/use-toast";
 //! TODO: CONNECT TO ROUTE
 
 
@@ -246,7 +247,19 @@ export default function Sidebar() {
 
           <div className={`py-4 border-t border-gray-200 dark:border-[#1F1F23] ${isSidebarOpen ? "px-4" : "px-2"} transform transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1.0)]`}>
             <div className="space-y-1">
-              <NavItem key={"Settings"} href={"/settings"} icon={Settings} handleNavigation={handleNavigation} collapsed={!isSidebarOpen}>
+              <NavItem 
+                key={"Settings"} 
+                href={"/settings"} 
+                icon={Settings} 
+                handleNavigation={handleNavigation} 
+                collapsed={!isSidebarOpen}  
+                onClick={(e) => {
+                e.preventDefault()
+                toast({
+                  title: "LLM Config Feature WIP",
+                  description: "LLM editing is coming soon!",
+                })
+              }}>
                 Settings
               </NavItem>
 

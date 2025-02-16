@@ -23,7 +23,9 @@ export default function CostOverTime({ data }: CostOverTimeProps) {
     >
       <AreaChart data={data}>
         <XAxis dataKey="date" />
-        <YAxis />
+        <YAxis 
+          tickFormatter={(value) => `$${value}`}
+        />
         <CartesianGrid strokeDasharray="3 3" />
         <ChartTooltip content={<ChartTooltipContent />} />
         <Area 

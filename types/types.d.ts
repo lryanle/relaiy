@@ -38,5 +38,6 @@ export type Transaction = {
     input: number
     output: number
   }
-  type: "SMS" | "Voice" | "Email"
+  type: string
+  status?: string
 }

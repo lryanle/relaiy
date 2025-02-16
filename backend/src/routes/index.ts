@@ -39,14 +39,14 @@ index.post('/create-chat', async (req, res) => {
                 type,
                 tones,
                 requirements,
-                messages: {
-                    create: [
-                        {
-                            content: firstMessage,
-                            sender: 'ASSISTANT'
-                        }
-                    ]
-                }
+            }
+        });
+
+        await prisma.chatMessage.create({
+            data: {
+                threadId: chat.id,
+                content: firstMessage,
+                sender: 'ASSISTANT'
             }
         });
 

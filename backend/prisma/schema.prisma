@@ -8,39 +8,28 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum ThreadStatus {
-  ACTIVE
-  INACTIVE
-  COMPLETED
-}
-
-enum ChannelType {
-  SMS
-  VOICE
-  EMAIL
-}
-
 model ChatThread {
-  id          String        @id @default(uuid())
-  createdAt   DateTime      @default(now())
-  status      ThreadStatus  @default(ACTIVE)
-  messages    ChatMessage[]
-  channels    ChannelType   @default(SMS)
-  goal        String
-  userId      String
-  destination String
-  type        ChannelType
-  tones       String[]
+  id           String        @id @default(uuid())
+  createdAt    DateTime      @default(now())
+  status       ThreadStatus  @default(ACTIVE)
+  channels     ChannelType   @default(SMS)
+  goal         String
+  userId       String
+  destination  String
+  type         ChannelType
   requirements String[]
+  tones        String[]
+  messages     ChatMessage[]
 }
 
 model ChatMessage {
-  id        String     @id @default(uuid())
+  id        String       @id @default(cuid())
+  threadId  String
   content   String
   sender    Sender
-  timestamp DateTime   @default(now())
-  threadId  String
-  thread    ChatThread @relation(fields: [threadId], references: [id])
+  thread    ChatThread   @relation(fields: [threadId], references: [id])
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt @default(now())
 }
 
 model account {
@@ -91,6 +80,18 @@ model verification {
   expiresAt  DateTime
   createdAt  DateTime?
   updatedAt  DateTime?
+}
+
+enum ThreadStatus {
+  ACTIVE
+  INACTIVE
+  COMPLETED
+}
+
+enum ChannelType {
+  SMS
+  VOICE
+  EMAIL
 }
 
 enum Sender {

@@ -14,6 +14,16 @@ const messageSchema = z.object({
 
 type ChatMessage = { role: 'user' | 'assistant', content: string };
 
+// Add interface for model response with usage
+interface ModelResponse {
+    content: string;
+    usage_metadata?: {
+        output_tokens: number;
+        input_tokens: number;
+        total_tokens: number;
+    };
+}
+
 function parseModelResponse(content: string): ResponseFormat[] {
     try {
         // Try to find and parse JSON array in the response
@@ -34,8 +44,6 @@ function parseModelResponse(content: string): ResponseFormat[] {
         return [];
     }
 }
-
-
 
 export const wsMessage = async (ws: WebSocket, message: string) => {
     try {
@@ -70,17 +78,28 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
         });
 
         const responses: ResponseFormat[] = [];
+        const modelUsage: Record<string, { input: number; output: number; cost: number }> = {};
 
         await Promise.all(Object.entries(models).map(async ([modelName, model]) => {
             try {
-                const result = await model.invoke([{
+                const result = await model.model.invoke([{
                     role: 'user',
                     content: prompt
-                }]);
+                }]) as ModelResponse; // Cast to our interface
 
                 if (typeof result.content === 'string') {
                     const parsedResponses = parseModelResponse(result.content);
                     
+                    // Store usage data if available
+                    if (result.usage_metadata) {
+                        modelUsage[modelName] = {
+                            input: result.usage_metadata.input_tokens,
+                            output: result.usage_metadata.output_tokens,
+                            cost: ((result.usage_metadata.input_tokens * model.price.input) + 
+                                   (result.usage_metadata.output_tokens * model.price.output)) / 1_000_000
+                        };
+                    }
+
                     // Only send valid responses back to client
                     if (parsedResponses.length > 0) {
                         ws.send(JSON.stringify({
@@ -122,22 +141,12 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
             const completionVotes = responses.filter(r => r.isComplete).length;
             const isComplete = responses.length >= 2 && completionVotes > responses.length / 2;
 
-            ws.send(JSON.stringify({
-                chatId: parsedMessage.data.chatId,
-                bestResponse,
-                isComplete,
-                timestamp: new Date().toISOString()
-            }));
+            // Calculate total usage for the best response
+            const totalInputTokens = Object.values(modelUsage).reduce((sum, usage) => sum + usage.input, 0);
+            const totalOutputTokens = Object.values(modelUsage).reduce((sum, usage) => sum + usage.output, 0);
+            const totalCost = Object.values(modelUsage).reduce((sum, usage) => sum + usage.cost, 0);
 
-            if (parsedMessage.data.destination) {
-                await twilioClient.messages.create({
-                    body: bestResponse,
-                    to: `whatsapp:${parsedMessage.data.destination}`,
-                    from: 'whatsapp:+14155238886',
-                });
-            }
-
-            // Create messages and update thread status
+            // Modified database transaction to include usage data
             await db.$transaction([
                 db.chatMessage.createMany({
                     data: [
@@ -149,7 +158,11 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
                         {
                             threadId: parsedMessage.data.chatId,
                             content: bestResponse,
-                            sender: 'ASSISTANT'
+                            sender: 'ASSISTANT',
+                            inputTokenUsage: totalInputTokens,
+                            outputTokenUsage: totalOutputTokens,
+                            cost: totalCost,
+                            modelName: Object.keys(modelUsage).join(',') // Store all models used
                         }
                     ]
                 }),
@@ -158,6 +171,28 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
                     data: { status: isComplete ? 'COMPLETED' : 'ACTIVE' }
                 })
             ]);
+
+            // Include usage information in the response to client
+            ws.send(JSON.stringify({
+                chatId: parsedMessage.data.chatId,
+                bestResponse,
+                isComplete,
+                usage: {
+                    inputTokens: totalInputTokens,
+                    outputTokens: totalOutputTokens,
+                    cost: totalCost,
+                    models: modelUsage
+                },
+                timestamp: new Date().toISOString()
+            }));
+
+            if (parsedMessage.data.destination) {
+                await twilioClient.messages.create({
+                    body: bestResponse,
+                    to: `whatsapp:${parsedMessage.data.destination}`,
+                    from: 'whatsapp:+14155238886',
+                });
+            }
         } else {
             ws.send(JSON.stringify({
                 chatId: parsedMessage.data.chatId,

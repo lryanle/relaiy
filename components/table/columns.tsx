@@ -1,7 +1,7 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { Conversation, Status } from "@/types/types"
+import { Conversation } from "@/types/types"
 import { Mail, MessageCircle, Phone, CircleHelp } from "lucide-react"
 import { FaDiscord } from "react-icons/fa"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"

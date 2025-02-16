@@ -271,10 +271,10 @@ export const wsMessage = async (ws: WebSocket, message: string, onCall = false) 
             const completionVotes = responses.filter(r => r.isComplete).length;
             const isComplete = responses.length >= 2 && completionVotes > responses.length / 2;
 
-            // Calculate total usage for the best response
-            const totalInputTokens = Object.values(modelUsage).reduce((sum, usage) => sum + usage.input, 0);
-            const totalOutputTokens = Object.values(modelUsage).reduce((sum, usage) => sum + usage.output, 0);
-            const totalCost = Object.values(modelUsage).reduce((sum, usage) => sum + usage.cost, 0);
+            // Calculate total usage with null checks and defaults
+            const totalInputTokens = Object.values(modelUsage).reduce((sum, usage) => sum + (usage.input || 0), 0);
+            const totalOutputTokens = Object.values(modelUsage).reduce((sum, usage) => sum + (usage.output || 0), 0);
+            const totalCost = Object.values(modelUsage).reduce((sum, usage) => sum + (usage.cost || 0), 0);
 
             console.log('parsedMessage.data.message', parsedMessage.data.message);
             // Modified database transaction to include usage data
@@ -290,10 +290,10 @@ export const wsMessage = async (ws: WebSocket, message: string, onCall = false) 
                             threadId: parsedMessage.data.chatId,
                             content: bestResponse.bestResponse.response,
                             sender: 'ASSISTANT',
-                            inputTokenUsage: totalInputTokens ?? 0,
-                            outputTokenUsage: totalOutputTokens ?? 0,
-                            cost: totalCost ?? 0,
-                            modelName: Object.keys(modelUsage).join(',') // Store all models used
+                            inputTokenUsage: Math.max(0, totalInputTokens),
+                            outputTokenUsage: Math.max(0, totalOutputTokens),
+                            cost: Math.max(0, totalCost),
+                            modelName: Object.keys(modelUsage).join(',')
                         }
                     ]
                 }),

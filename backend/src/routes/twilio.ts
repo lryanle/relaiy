@@ -42,6 +42,8 @@ twilioRouter.post('/',
                 message: Body,
                 destination: From.replace('whatsapp:', '')
             }));
+        } else {
+            console.log('No WebSocket client found');
         }
 
         res.send('OK');

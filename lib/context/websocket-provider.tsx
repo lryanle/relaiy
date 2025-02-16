@@ -26,13 +26,16 @@ type ResponsePool = {
     timestamp: string
 }
 
-type ResponseStatus = "best" | "okay" | "bad"
+type ResponseStatus = "best" | "okay" | "bad" | "pending" | "error"
 
 type DataPoint = {
-    response?: string
-    model: string
-    responseId: string
-    timestamp?: string
+    modelType: string
+    status: ResponseStatus
+    messages: {
+        role: "user" | "assistant"
+        content: string
+    }[]
+    score: number
 }
 
 type SingleResponse = {
@@ -104,7 +107,6 @@ export function WebSocketProvider({
                     // Store response pools if needed
                     // loop through the pools and set the ids
                     if (currentChatId) {
-                        alert("invalidating chat")
                         await queryClient.invalidateQueries({ queryKey: ["chat", currentChatId] })
                         await queryClient.invalidateQueries({ queryKey: ["chats"] })
                     }
@@ -112,7 +114,12 @@ export function WebSocketProvider({
                         for (const id of ids) {
                             setIds(prevIds => ({
                                 ...prevIds,
-                                [id]: { model, responseId: id }
+                                [id]: {
+                                    modelType: model,
+                                    status: "pending",
+                                    messages: [],
+                                    score: 0
+                                }
                             }))
                         }
                     }
@@ -134,14 +141,44 @@ export function WebSocketProvider({
 
                     setIds(prevIds => ({
                         ...prevIds,
-                        [message.responseId]: { ...message }
+                        [message.responseId]: {
+                            ...prevIds[message.responseId],
+                            modelType: message.model,
+                            status: "okay",
+                            messages: [{ role: "assistant", content: message.response }],
+                            score: 0
+                        }
                     }))
 
                     break
 
                 default:
                     // Handle best response
-                    setBestId(ids[message.bestResponse.responseId] || null)
+
+                    if (message.bestResponse.responseId) {
+                        setBestId(ids[message.bestResponse.responseId] || null)
+                        setIds(prevIds => ({
+                            ...prevIds,
+                            [message.bestResponse.responseId]: {
+                                ...prevIds[message.bestResponse.responseId],
+                                status: "best",
+                                messages: [{ role: "assistant", content: message.bestResponse.response }],
+                                score: message.bestResponse.score
+                            }
+                        }))
+
+                        for (const [id, response] of Object.entries(message.allResponses)) {
+                            setIds(prevIds => ({
+                                ...prevIds,
+                                [id]: {
+                                    ...prevIds[id],
+                                    status: response.status,
+                                    messages: [{ role: "assistant", content: response.response }],
+                                    score: response.score
+                                }
+                            }))
+                        }
+                    }
                     if (currentChatId) {
                         await queryClient.invalidateQueries({ queryKey: ["chat", currentChatId] })
                         await queryClient.invalidateQueries({ queryKey: ["chats"] })

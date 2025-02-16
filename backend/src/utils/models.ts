@@ -32,7 +32,7 @@ const createModel = (config: {
         provider: {
             ...config.openRouterConfig,
             data_collection: config.openRouterConfig?.data_collection ?? 'deny',
-            sort: config.openRouterConfig?.sort ?? 'price',
+            sort: config.openRouterConfig?.sort ?? process.env.NODE_ENV === 'production' ? 'throughput' : 'price',
             allow_fallbacks: config.openRouterConfig?.allow_fallbacks ?? true,
         }
     } : undefined

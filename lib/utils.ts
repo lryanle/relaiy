@@ -51,7 +51,7 @@ export async function createNewChat(formData: {
   tones: string[]
   requirements: string[]
 }) {
-  const response = await fetch('/api/chats', {
+  const response = await fetch('/api/createChat', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

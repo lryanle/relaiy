@@ -1,10 +1,10 @@
 "use client";
 
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 import Navbar from "@/components/nav/navbar";
 import Sidebar from "@/components/nav/sidebar";
+import { useTheme } from "next-themes";
 import { Lexend, Oxygen_Mono } from "next/font/google";
+import { useEffect, useState } from "react";
 
 
 interface Navigationprops {
@@ -42,7 +42,7 @@ export default function Navigation({ children }: Readonly<Navigationprops>) {
         <header className="h-16 border-gray-200 dark:border-[#1F1F23]">
           <Navbar />
         </header>
-          <main className="flex-1 overflow-auto p-6 bg-white dark:bg-[#0F0F12] font-[family-name:var(--font-lexend)]">
+          <main className="flex-1 overflow-auto bg-white dark:bg-[#0F0F12] font-[family-name:var(--font-lexend)]">
             {children}
           </main>
       </div>

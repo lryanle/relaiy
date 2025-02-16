@@ -14,7 +14,7 @@ export default function Chat({ params }: { params: Promise<{ slug: string }> }) 
   const { user } = useAuth()
 
   const { data: messages, isLoading } = useQuery({
-    queryKey: ["chat", slug],
+    queryKey: ["conversation", slug],
     queryFn: () => getChat(slug),
   })
 

@@ -100,7 +100,7 @@ export function WebSocketProvider({
                     // Store response pools if needed
                     // loop through the pools and set the ids
                     if (currentChatId) {
-                        await queryClient.invalidateQueries({ queryKey: ["chat", currentChatId] })
+                        await queryClient.invalidateQueries({ queryKey: ["conversation", currentChatId] })
                         await queryClient.invalidateQueries({ queryKey: ["chats"] })
                     }
                     for (const [model, ids] of Object.entries(message.pools)) {

@@ -1,10 +1,10 @@
-import { cn, formatReceipientId } from "@/lib/utils";
-import { Conversation, StateStatus } from "@/types/types";
-import { useMemo } from "react";
-import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { cn, formatReceipientId } from "@/lib/utils";
+import { Conversation, StateStatus } from "@/types/types";
+import { X } from "lucide-react";
 import Link from "next/link";
+import { useMemo } from "react";
 
 interface Message {
   role: string;
@@ -108,7 +108,7 @@ export function InspectAgent({ selectedConvo, states, title = "Conversation Eval
                 {state.score.toFixed(2)}
               </span>
               <span className="w-full text-sm text-gray-700 dark:text-gray-300">
-                {state.messages[state.messages.length - 1].content}
+                {state.messages.length > 0 && state.messages[state.messages.length - 1].content}
               </span>
             </div>
           ))}

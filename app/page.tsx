@@ -6,8 +6,8 @@ import { DataTable } from "@/components/table/data-table"
 import Spinner from "@/components/ui/spinner"
 import { useWebSocket } from "@/lib/context/websocket-provider"
 import { getChatsForUser } from "@/lib/utils"
+import { Conversation } from "@/types/types"
 import { useQuery } from "@tanstack/react-query"
-import { Conversation, StateStatus } from "@/types/types"
 import { useState } from "react"
 
 // const data: Conversation[] = [
@@ -663,6 +663,11 @@ export default function Home() {
     queryKey: ["chats"],
     queryFn: getChatsForUser,
   })
+
+  // const { data: oldDataPoints, isLoading: isDataPointsLoading } = useQuery({
+  //   queryKey: ["dataPoints"],
+  //   queryFn: getDataPoints,
+  // })
 
   const tableData = chats?.map(chat => ({
     id: chat.id,

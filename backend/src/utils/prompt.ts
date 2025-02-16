@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-
 // Zod schema for input validation
 const PromptSchema = z.object({
     goal: z.string(),
@@ -8,22 +7,36 @@ const PromptSchema = z.object({
         role: z.enum(['user', 'assistant']),
         content: z.string()
     })).optional(),
+    profileInfomation: z.object({
+        name: z.string(),
+        age: z.number(),
+        gender: z.enum(['male', 'female']),
+        location: z.string(),
+        interests: z.array(z.string())
+    }),
     tone: z.string().optional().default('neutral'),
     requirements: z.array(z.string()).optional(),
 });
 
 type PromptParams = z.infer<typeof PromptSchema>;
 
+// Add new type for response format
+type ResponseFormat = {
+    response: string;
+    isComplete: boolean;
+    reason?: string;
+};
+
 // Create prompt template
 export const createPrompt = (params: PromptParams) => {
     PromptSchema.parse(params);
-    let prompt = 'Your task is to generate 5 different responses in JSON array format based on these parameters:\n';
-    prompt += `Act as a human conversation partner to generate 5 distinct, natural response variations in JSON format. Follow these guidelines:
-1. Responses should feel spontaneous and authentic, like real human conversation
-2. Vary sentence structures (mix short/long, questions/statements)
-3. Use natural imperfections (e.g., occasional "um", "hmm" where appropriate)
-4. Match this tone: ${params.tone})
-5. Keep language contemporary and colloquial`;
+    let prompt = `You are ${params.profileInfomation.name}, ${params.profileInfomation.age} years old, ${params.profileInfomation.gender}, from ${params.profileInfomation.location}. You have interests in ${params.profileInfomation.interests.join(', ')}. Act as a human conversation partner to generate 10 distinct, natural response variations in JSON format. Follow these guidelines:
+    1. Responses should feel spontaneous and authentic, like real human conversation
+    2. Vary sentence structures (mix short/long, questions/statements)
+    3. Use natural imperfections (e.g., occasional "um", "hmm" where appropriate)
+    4. Match this tone: ${params.tone})
+    5. Keep language contemporary and colloquial
+    6. For each response, evaluate if the conversation goal has been achieved`;
 
     if (params.history?.length) {
         prompt += `\nConversation History:\n${params.history
@@ -37,7 +50,14 @@ export const createPrompt = (params: PromptParams) => {
         prompt += `\nSpecial Requirements:\n- ${params.requirements.join('\n- ')}`;
     }
 
-    prompt += '\n\nRespond ONLY with a valid JSON array of 5 response variations. Each array element should be an object with a "response" field.';
+    prompt += `\n\nGoal of conversation: ${params.goal}`;
+
+    prompt += '\n\nRespond ONLY with a valid JSON array of 10 response variations. Each array element should be an object with:';
+    prompt += '\n- "response": the message text';
+    prompt += '\n- "isComplete": boolean indicating if the conversation goal is achieved';
+    prompt += '\n- "reason": optional explanation of why the conversation is considered complete or not';
 
     return prompt;
 };
+
+export type { ResponseFormat };

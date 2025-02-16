@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,10 +7,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model ChatMessage {
+  id         Int        @id @default(autoincrement())
+  content    String
+  sender     Sender
+  timestamp  DateTime   @default(now())
+  threadId   Int
+  ChatThread ChatThread @relation(fields: [threadId], references: [id])
+}
+
+model ChatThread {
+  id          Int           @id @default(autoincrement())
+  createdAt   DateTime      @default(now())
+  ChatMessage ChatMessage[]
+}
+
+enum Sender {
+  USER
+  ASSISTANT
+}
+
 model User {
-  id            Int       @id @default(autoincrement())
-  email         String    @unique
-  name          String?
+  id            String    @id
+  name          String
+  email         String
   emailVerified Boolean
   image         String?
   createdAt     DateTime
@@ -24,6 +38,8 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+
+  @@unique([email])
   @@map("user")
 }
 

@@ -2,9 +2,10 @@
 
 import { columns } from "@/components/table/columns"
 import { DataTable } from "@/components/table/data-table"
+import Spinner from "@/components/ui/spinner"
 import { getChatsForUser } from "@/lib/utils"
-import { useQuery } from "@tanstack/react-query"
 import { Conversation } from "@/types/types"
+import { useQuery } from "@tanstack/react-query"
 
 const data: Conversation[] = [
   {
@@ -67,11 +68,15 @@ export default function Home() {
   })) || []
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return (
+      <div className="flex items-center justify-center w-full h-full">
+        <Spinner />
+      </div>
+    )
   }
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto p-6">
       {/* <h1 className="text-2xl font-bold mb-5">Automated Conversations</h1> */}
       <DataTable 
         columns={columns} 

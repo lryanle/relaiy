@@ -46,7 +46,7 @@ model StockfishResponse {
   responseId String
   threadId String
   thread ChatThread @relation(fields: [threadId], references: [id])
-  ratio Float
+  ratio Float @default(-1)
 }
 
 model account {

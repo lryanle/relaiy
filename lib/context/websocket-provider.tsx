@@ -32,7 +32,7 @@ export function WebSocketProvider({
         }
 
         // Create WebSocket connection
-        const socket = new WebSocket(url + "?" + user?.id)
+        const socket = new WebSocket(url + "?userId=" + user?.id)
         socketRef.current = socket
 
         // Connection opened

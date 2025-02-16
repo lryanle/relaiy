@@ -2,14 +2,15 @@
 
 import { SignInModal } from "@/components/auth/sign-in-modal"
 import { SignUpModal } from "@/components/auth/sign-up-modal"
+import { NewChatModal } from "@/components/chat/new-chat-modal"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/lib/context/auth-provider"
-import { createNewChat } from "@/lib/utils"
-import { Bell, ChevronRight, Plus, User } from "lucide-react"
+import { Bell, User } from "lucide-react"
 import Link from "next/link"
-import { Button } from "../ui/button"
+import { usePathname } from "next/navigation"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "../ui/breadcrumb"
 
 interface BreadcrumbItem {
   label: string
@@ -17,34 +18,59 @@ interface BreadcrumbItem {
 }
 
 export default function Navbar() {
-  const breadcrumbs: BreadcrumbItem[] = [
-    { label: "relaiy", href: "#" },
-    { label: "dashboard", href: "#" },
-  ]
+  const pathname = usePathname()
 
+  const getBreadcrumbs = () => {
+    const paths = pathname?.split('/').filter(Boolean)
+    const urlParams = new URLSearchParams(window.location.search)
+    const id = urlParams.get('id')
+    
+    if (!paths?.length) {
+      const breadcrumbs = [
+        { label: "Dashboard", href: "/" }
+      ]
+      
+      if (id) {
+        breadcrumbs.push({ label: `#${id}`, href: `/?id=${id}` })
+      }
+      
+      return breadcrumbs
+    }
+
+    // Build breadcrumbs array for other routes
+    return paths.map((path, index) => {
+      const href = `/${paths.slice(0, index + 1).join('/')}`
+      const label = path.charAt(0).toUpperCase() + path.slice(1)
+      return { label, href }
+    })
+  }
+
+  const breadcrumbs = getBreadcrumbs()
   const { user, signOut } = useAuth();
 
   return (
     <nav className="px-3 sm:px-6 flex items-center justify-between bg-white dark:bg-[#0F0F12] border-b border-gray-200 dark:border-[#1F1F23] h-full">
-      <div className="font-medium text-sm hidden sm:flex items-center space-x-1 truncate max-w-[300px]">
-        {breadcrumbs.map((item, index) => (
-          <div key={item.label} className="flex items-center">
-            {index > 0 && <ChevronRight className="h-4 w-4 text-gray-500 dark:text-gray-400 mx-1" />}
-            {item.href ? (
-              <Link
-                href={item.href}
-                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-              >
-                {item.label}
-              </Link>
-            ) : (
-              <span className="text-gray-900 dark:text-gray-100">{item.label}</span>
-            )}
-          </div>
-        ))}
+      <div className="font-medium text-sm hidden sm:flex items-center truncate max-w-[300px]">
+        <Breadcrumb>
+          <BreadcrumbList className="flex-nowrap whitespace-nowrap">
+            {breadcrumbs.map((item, index) => (
+              <BreadcrumbItem key={item.href} className="flex-shrink-0">
+                {index === breadcrumbs.length - 1 ? (
+                  <BreadcrumbPage className="truncate">{item.label}</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink>
+                    <Link href={item.href} className="truncate">{item.label}</Link>
+                  </BreadcrumbLink>
+                )}
+                {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+              </BreadcrumbItem>
+            ))}
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4 ml-auto sm:ml-0">
+        {user && <NewChatModal />}
         <button
           type="button"
           className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-[#1F1F23] rounded-full transition-colors"
@@ -54,11 +80,7 @@ export default function Navbar() {
 
         <ThemeToggle />
 
-        {user ? (<>
-        <Button variant="outline" onClick={createNewChat}>
-          <Plus className="h-4 w-4" />
-          New C-Agent
-        </Button>
+        {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger className="focus:outline-none">
               <Avatar>
@@ -84,7 +106,6 @@ export default function Navbar() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          </>
         ) : (
           <div className="flex items-center gap-2">
             <SignInModal />

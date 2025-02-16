@@ -19,13 +19,14 @@ export async function GET(request: Request) {
             },
             include: {
                 ChatMessage: {
-                    orderBy: {
-                        createdAt: 'desc'
-                    },
-                    take: 1 // Get latest message
+                    select: {
+                        cost: true,
+                        createdAt: true,
+                        updatedAt: true
+                    }
                 },
                 _count: {
-                    select: { ChatMessage: true } // Get message count
+                    select: { ChatMessage: true }
                 }
             },
             orderBy: {
@@ -43,7 +44,9 @@ export async function GET(request: Request) {
             message_count: thread._count.ChatMessage,
             goal: thread.goal,
             requirements: thread.requirements,
-            tones: thread.tones
+            tones: thread.tones,
+            // Calculate total cost
+            total_cost: thread.ChatMessage.reduce((sum, msg) => sum + (msg.cost || 0), 0)
         }))
 
         console.log(chats) 

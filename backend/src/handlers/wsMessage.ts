@@ -71,12 +71,16 @@ export const wsMessage = async (ws: WebSocket, message: string, onCall = false) 
         const thread = await db.chatThread.findUnique({
             where: { id: parsedMessage.data.chatId }
         });
+        
+        console.log(thread);
 
         const account = await db.account.findFirst({
             where: { 
                 id: thread?.userId
             }
         });
+
+        console.log(account);
 
         if (!thread) {
             ws.send(JSON.stringify({ error: 'Thread not found' }));

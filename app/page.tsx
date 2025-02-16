@@ -5,10 +5,11 @@ import { columns } from "@/components/table/columns"
 import { DataTable } from "@/components/table/data-table"
 import Spinner from "@/components/ui/spinner"
 import { useWebSocket } from "@/lib/context/websocket-provider"
-import { getChatsForUser } from "@/lib/utils"
+import { getChatsForUser, getOldDataPoints } from "@/lib/utils"
 import { Conversation } from "@/types/types"
+import { DataPoint } from "@/types/websocket"
 import { useQuery } from "@tanstack/react-query"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 // const data: Conversation[] = [
 //   {
@@ -53,609 +54,6 @@ import { useState } from "react"
 //   },
 // ]
 
-const states = [
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!hi, this is a test!hi, this is a test!hi, this is a test!hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-4o",
-    status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
-    score: -1
-  },
-  {
-    modelType: "llama3.1",
-    status: "error",
-    messages: [{"role": "user", "content": "hi, this is a test #2!"}],
-    score: -1
-  },
-  {
-    modelType: "gemini-flash-2.0",
-    status: "bad",
-    messages: [{"role": "user", "content": "hi, this is a test #3!"}],
-    score: 2
-  },
-  {
-    modelType: "sonnet3.5",
-    status: "okay",
-    messages: [{"role": "user", "content": "hi, this is a test #4!"}],
-    score: 5
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  },
-  {
-    modelType: "gpt-o1",
-    status: "good",
-    messages: [{"role": "user", "content": "hi, this is a test #5!"}],
-    score: 7
-  },
-  {
-    modelType: "gpt-3.5-turbo",
-    status: "best",
-    messages: [{"role": "user", "content": "hi, this is a test #6!"}],
-    score: 9
-  }
-  
-]
 
 export default function Home() {
   const [selectedConvo, setSelectedConvo] = useState<Conversation | null>(null)
@@ -664,10 +62,37 @@ export default function Home() {
     queryFn: getChatsForUser,
   })
 
-  // const { data: oldDataPoints, isLoading: isDataPointsLoading } = useQuery({
-  //   queryKey: ["dataPoints"],
-  //   queryFn: getDataPoints,
-  // })
+  const [newDataPoints, setNewDataPoints] = useState<DataPoint[]>([])
+
+  const { dataPoints, currentChatId } = useWebSocket()
+
+  async function _getOldDataPoints(id: string, idx: number) {
+
+    if (currentChatId === id) {
+      setNewDataPoints(Object.values(dataPoints))
+      return
+    }
+
+    const data = await getOldDataPoints(id, idx)
+    setNewDataPoints(data.stockfishResponse.map(state => ({
+      status: "best",
+      modelType: state.modelName ?? "",
+      messages: [
+        {
+          role: "assistant",
+          content: state.response
+        }
+      ],
+      score: 0 // TODO: Add relay score
+    }))) 
+
+  }
+
+  useEffect(() => {
+    if (selectedConvo) {
+      _getOldDataPoints(selectedConvo.id, 0)
+    }
+  }, [selectedConvo])
 
   const tableData = chats?.map(chat => ({
     id: chat.id,
@@ -680,7 +105,7 @@ export default function Home() {
     totalPrice: chat.total_cost,
   })) || []
 
-  const {dataPoints} = useWebSocket()
+
 
   if (isLoading) {
     return (
@@ -690,9 +115,9 @@ export default function Home() {
     )
   }
 
-  const maxScore = Math.max(...Object.values(dataPoints).map(state => state.score))
-  const minScore = Math.min(...Object.values(dataPoints).map(state => state.score))
-  console.log(maxScore, minScore) 
+  const maxScore = Math.max(...newDataPoints.map(state => state.score))
+  const minScore = Math.min(...newDataPoints.map(state => state.score))
+  console.log(maxScore, minScore)
 
   function getStatusFromScore(score: number) {
     if (score === maxScore) {
@@ -708,13 +133,13 @@ export default function Home() {
 
   return (
     <div className="p-4 container mx-auto flex flex-col md:flex-row gap-4 justify-center items-start">
-      <DataTable 
-        columns={columns} 
-        data={tableData} 
+      <DataTable
+        columns={columns}
+        data={tableData}
         onRowClick={setSelectedConvo}
         selectedConvo={selectedConvo}
       />
-      {selectedConvo && <InspectAgent setSelectedConvo={setSelectedConvo} selectedConvo={selectedConvo} states={Object.values(dataPoints).map(state => ({
+      {selectedConvo && <InspectAgent setSelectedConvo={setSelectedConvo} selectedConvo={selectedConvo} states={newDataPoints.map(state => ({
         ...state,
         status: getStatusFromScore(state.score)
       }))} />}

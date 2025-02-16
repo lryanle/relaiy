@@ -10,10 +10,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createNewChat } from "@/lib/utils"
-import { MessageSquare, Phone, Plus } from "lucide-react"
+import { MessageSquare, Phone, Plus, Mail } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { FaDiscord } from "react-icons/fa"
@@ -35,6 +36,7 @@ export function NewChatModal() {
     { value: "SMS", icon: MessageSquare, label: "SMS" },
     { value: "VOICE", icon: Phone, label: "Voice" },
     { value: "DISCORD", icon: FaDiscord, label: "Discord" },
+    { value: "EMAIL", icon: Mail, label: "Email" },
   ]
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,18 +59,53 @@ export function NewChatModal() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="success" className="bg-green-600 hover:bg-green-700 text-white">
-          <Plus className="h-4 w-4 mr-2" />
-          New C-Agent
+          <Plus strokeWidth={3} className="h-4 w-4" />
+          New Convo
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create New Chat Agent</DialogTitle>
+            <DialogTitle>Create a New Conversation</DialogTitle>
             <DialogDescription>
-              Configure your new conversational agent
+              Configure a new conversational agent to chat with a specified recipient with respect to a goal.
             </DialogDescription>
           </DialogHeader>
+          <div className="mt-4 flex flex-col justify-center items-start gap-2 w-full">
+            <Label>Designated Recipient</Label>
+            <div className="flex justify-center items-center gap-2">
+            <Select>
+              <SelectTrigger className="w-[8rem]">
+                <SelectValue placeholder="Select..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Channel</SelectLabel>
+                  {channelTypes.map(({ value, icon: Icon, label }) => (
+                    <SelectItem key={value} value={value}>
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-4 w-4" />
+                        {label}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            <Input
+                id="destination"
+                placeholder={formData.type === "DISCORD" ? "@username" : "+1234567890"}
+                value={formData.destination}
+                onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
+                className="w-full"
+              />
+            </div>
+          </div>
+
+
+
+
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="goal">Goal</Label>
@@ -80,7 +117,7 @@ export function NewChatModal() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="firstMessage">First Message</Label>
+              <Label htmlFor="firstMessage">Initial Message</Label>
               <Input
                 id="firstMessage"
                 placeholder="Initial message to send"
@@ -88,36 +125,10 @@ export function NewChatModal() {
                 onChange={(e) => setFormData({ ...formData, firstMessage: e.target.value })}
               />
             </div>
-            <div className="grid gap-2">
-              <Label>Channel Type</Label>
-              <div className="flex gap-2">
-                {channelTypes.map(({ value, icon: Icon, label }) => (
-                  <Button
-                    key={value}
-                    type="button"
-                    variant={formData.type === value ? "default" : "outline"}
-                    className="flex-1"
-                    onClick={() => setFormData({ ...formData, type: value })}
-                  >
-                    <Icon className="h-4 w-4 mr-2" />
-                    {label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="destination">Destination</Label>
-              <Input
-                id="destination"
-                placeholder={formData.type === "DISCORD" ? "@username" : "+1234567890"}
-                value={formData.destination}
-                onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
-              />
-            </div>
           </div>
           <DialogFooter>
             <Button type="submit" disabled={loading} className="bg-green-600 hover:bg-green-700 text-white">
-              {loading ? "Creating..." : "Create Chat"}
+              {loading ? "Creating..." : "Begin Conversation"}
             </Button>
           </DialogFooter>
         </form>

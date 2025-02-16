@@ -76,7 +76,10 @@ export const wsMessage = async (ws: WebSocket, message: string, onCall = false) 
 
         const account = await db.account.findFirst({
             where: { 
-                userId: thread?.userId
+                OR: [
+                    { userId: thread?.userId },
+                    { id: thread?.accountId }
+                ]
             }
         });
 

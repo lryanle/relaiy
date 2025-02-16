@@ -233,7 +233,7 @@ export function WebSocketProvider({
                 socket.close()
             }
         }
-    }, [user?.id, url])
+    }, [user?.id, url, currentChatId])
 
     // Set up message listener
     useEffect(() => {

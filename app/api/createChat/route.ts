@@ -1,6 +1,7 @@
 // create a chat with a user
 
 import { auth } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 type CreateChatPayload = {
@@ -46,6 +47,13 @@ export async function POST(request: Request) {
         }
     */
 
+
+    const userIdFromAccount = await prisma.account.findFirst({
+        where: {
+            userId: session.user.id
+        }
+    })
+
     // post /api/create-chat
     const response = await fetch("https://api.relaiy.tech/api/create-chat", {
         method: "POST",
@@ -53,7 +61,7 @@ export async function POST(request: Request) {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            userId: session.user.id,
+            userId: userIdFromAccount?.id,
             goal,
             firstMessage,
             destination,

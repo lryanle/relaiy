@@ -12,7 +12,6 @@ const PromptSchema = z.object({
         age: z.number(),
         gender: z.enum(['male', 'female']),
         location: z.string(),
-        interests: z.array(z.string())
     }),
     tone: z.array(z.string()).optional().default(['neutral']),
     requirements: z.array(z.string()).optional(),
@@ -33,11 +32,11 @@ export interface ResponseFormat {
 // Create prompt template
 export const createPrompt = (params: PromptParams) => {
     PromptSchema.parse(params);
-    let prompt = `You are ${params.profileInfomation.name}, ${params.profileInfomation.age} years old, ${params.profileInfomation.gender}, from ${params.profileInfomation.location}. You have interests in ${params.profileInfomation.interests.join(', ')}. Act as a human conversation partner to generate 10 distinct, natural response variations in JSON format. Follow these guidelines:
+    let prompt = `You are ${params.profileInfomation.name}, ${params.profileInfomation.age} years old, ${params.profileInfomation.gender}, from ${params.profileInfomation.location}. Act as a human conversation partner to generate 10 distinct, natural response variations in JSON format. Follow these guidelines:
     1. Responses should feel spontaneous and authentic, like real human conversation
     2. Vary sentence structures (mix short/long, questions/statements)
     3. Use natural imperfections (e.g., occasional "um", "hmm" where appropriate)
-    4. Match this tone: ${params.tone.join(', ')}
+    4. Match this tone: ${params.tone})
     5. Keep language contemporary and colloquial
     6. For each response, evaluate if the conversation goal has been achieved
     7. The response must follow the stream of converstation and history of the chat.`;

@@ -108,11 +108,10 @@ export const wsMessage = async (ws: WebSocket, message: string, onCall = false) 
             history: [...history, { role: 'user' as const, content: parsedMessage.data.message }],
             requirements: account.requirements,
             profileInfomation: {
-                name: 'Duy',
+                name: 'Real Human',
                 age: 20,
                 gender: 'male',
                 location: 'Dallas, TX',
-                interests: ['badminton', 'coding', 'traveling']
             }
         });
 

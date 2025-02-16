@@ -43,20 +43,27 @@ export const getChat = async (id: string): Promise<{messages: ChatMessage[]}> =>
 }
 
 // Create a new chat
-export const createNewChat = async (data: {
+export async function createNewChat(formData: {
   goal: string
   firstMessage: string
   destination: string
   type: string
   tones: string[]
   requirements: string[]
-}): Promise<ChatTabList> => {
-    const response = await fetch("/api/createChat", {
-        method: "POST",
-        body: JSON.stringify(data)
-    })
-    const responseData = await response.json()
-    return responseData.chats
+}) {
+  const response = await fetch('/api/chats', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(formData),
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to create chat')
+  }
+
+  return response.json()
 }
 
 // Get total cost
@@ -127,4 +134,30 @@ export function formatRelativeTime(date: Date): string {
   if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
   if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} months ago`;
   return `${Math.floor(diffInSeconds / 31536000)} years ago`;
+}
+
+export function isValidPhonenumber(phoneNumber: string): boolean {
+  const cleaned = phoneNumber.replace(/\D/g, '');
+  return cleaned.length === 10;
+}
+
+export function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+export function isValidDiscordUsername(username: string): boolean {
+  const discordUsernameRegex = /^@\w{3,32}$/;
+  return discordUsernameRegex.test(username);
+}
+
+export function isValidDestination(destination: string, type: Channel): boolean {
+  if (type === "sms") {
+    return isValidPhonenumber(destination);
+  } else if (type === "discord") {
+    return isValidDiscordUsername(destination);
+  } else if (type === "email") {
+    return isValidEmail(destination);
+  }
+  return false;
 }

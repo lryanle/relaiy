@@ -2,6 +2,7 @@ import Navigation from "@/components/nav/navigation";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/lib/context/auth-provider";
+import { WebSocketProvider } from "@/lib/context/websocket-provider";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -25,9 +26,11 @@ export default function RootLayout({
         disableTransitionOnChange
       >
         <AuthProvider>
-          <body className="antialiased">
-            <Navigation>{children}</Navigation>
-          </body>
+          <WebSocketProvider url="wss://your-websocket-url">
+            <body className="antialiased">
+              <Navigation>{children}</Navigation>
+            </body>
+          </WebSocketProvider>
         </AuthProvider>
         <Toaster />
       </ThemeProvider>

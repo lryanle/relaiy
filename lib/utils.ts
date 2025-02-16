@@ -186,7 +186,7 @@ export function getProviderIconFromModel(model: string) {
     return "/llmproviders/groq.svg"
   } else if (model.includes("gemini") || model.includes("google")) {
     return "/llmproviders/google.svg"
-  } else if (model.includes("aws") || model.includes("bedrock")) {
+  } else if (model.includes("aws") || model.includes("amazon") || model.includes("bedrock")) {
     return "/llmproviders/aws.svg"
   } else if (model.includes("deepseek")) {
     return "/llmproviders/deepseek.svg"
@@ -194,7 +194,11 @@ export function getProviderIconFromModel(model: string) {
     return "/llmproviders/meta.svg"
   } else if (model.includes("mistral")) {
     return "/llmproviders/mistral.svg"
-  } else {
+  } else if (model.includes("cohere")) {
+    return "/llmproviders/cohere.svg"
+  } else if (model.includes("perplexity")) {
+    return "/llmproviders/perplexity.svg"
+  } else  {
     return "/llmproviders/openai.svg"
   }
 }

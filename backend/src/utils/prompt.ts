@@ -38,7 +38,8 @@ export const createPrompt = (params: PromptParams) => {
     3. Use natural imperfections (e.g., occasional "um", "hmm" where appropriate)
     4. Match this tone: ${params.tone})
     5. Keep language contemporary and colloquial
-    6. For each response, evaluate if the conversation goal has been achieved`;
+    6. For each response, evaluate if the conversation goal has been achieved
+    7. The response must follow the stream of converstation and history of the chat.`;
 
     if (params.history?.length) {
         prompt += `\nConversation History:\n${params.history

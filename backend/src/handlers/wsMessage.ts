@@ -57,6 +57,15 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
         const messages = await db.chatMessage.findMany({
             where: { threadId: parsedMessage.data.chatId }
         });
+
+        const thread = await db.chatThread.findUnique({
+            where: { id: parsedMessage.data.chatId }
+        });
+
+        if (!thread) {
+            ws.send(JSON.stringify({ error: 'Thread not found' }));
+            return;
+        }
         
         const history: ChatMessage[] = messages.map(msg => ({
             role: msg.sender === 'USER' ? 'user' : 'assistant',
@@ -64,10 +73,10 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
         }));
 
         const prompt = createPrompt({
-            goal: 'You are trying to get a date or hanging out for the user.',
-            tone: 'friendly and helpful',
+            goal: thread.goal,
+            tone: thread.tones.join(', '),
             history: [...history, { role: 'user' as const, content: parsedMessage.data.message }],
-            requirements: ['Keep it short and concise'],
+            requirements: thread.requirements,
             profileInfomation: {
                 name: 'Duy',
                 age: 20,

@@ -32,6 +32,18 @@ export async function POST(request: Request) {
         }, { status: 400 })
     }
 
+    /*
+        {
+            "goal": "You are trying to get a date or hanging out for the user.",
+            "tones": ["friendly"],
+            "userId": "1",
+            "destination": "+14695963483",
+            "requirements": ["Keep it short and concise"],
+            "firstMessage": "hi hello",
+            "type": "SMS"
+        }
+    */
+
     // post /api/create-chat
     const response = await fetch("https://api.relaiy.tech/api/create-chat", {
         method: "POST",

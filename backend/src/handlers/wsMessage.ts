@@ -4,10 +4,12 @@ import { models } from '../utils/models';
 import z from 'zod';
 import { selectBestResponse } from '../utils/mcts';
 import db from '../db';
+import { twilioClient } from '../twilio';
 
 const messageSchema = z.object({
-    chatId: z.number(),
-    message: z.string()
+    chatId: z.string(),
+    message: z.string(),
+    destination: z.string().optional()
 });
 
 type ChatMessage = { role: 'user' | 'assistant', content: string };
@@ -33,6 +35,8 @@ function parseModelResponse(content: string): ResponseFormat[] {
     }
 }
 
+
+
 export const wsMessage = async (ws: WebSocket, message: string) => {
     try {
         const parsedMessage = messageSchema.safeParse(JSON.parse(message));
@@ -52,7 +56,7 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
         }));
 
         const prompt = createPrompt({
-            goal: 'You are trying to get a date or hanging out for the user. Your name is Duy.',
+            goal: 'You are trying to get a date or hanging out for the user.',
             tone: 'friendly and helpful',
             history: [...history, { role: 'user' as const, content: parsedMessage.data.message }],
             requirements: ['Keep it short and concise'],
@@ -124,6 +128,14 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
                 isComplete,
                 timestamp: new Date().toISOString()
             }));
+
+            if (parsedMessage.data.destination) {
+                await twilioClient.messages.create({
+                    body: bestResponse,
+                    to: `whatsapp:${parsedMessage.data.destination}`,
+                    from: 'whatsapp:+14155238886',
+                });
+            }
 
             // Create messages and update thread status
             await db.$transaction([

@@ -1,8 +1,12 @@
 import { app } from './app';
+import { markInactiveThreads } from './utils/threadStatus';
 const port = app.get('port');
 
 const server = app.listen(port, onListening);
 server.on('error', onError);
+
+// Check for inactive threads every minute
+setInterval(markInactiveThreads, 60 * 1000);
 
 function onError(error: NodeJS.ErrnoException) {
     if (error.syscall !== 'listen') {

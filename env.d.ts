@@ -5,6 +5,8 @@ declare global {
       GITHUB_CLIENT_SECRET: string
       // Add other environment variables here as needed
       NODE_ENV: 'development' | 'production' | 'test'
+      DISCORD_CLIENT_ID: string
+      DISCORD_CLIENT_SECRET: string
     }
   }
 }

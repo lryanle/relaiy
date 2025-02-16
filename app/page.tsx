@@ -1,12 +1,13 @@
 "use client"
 
+import { InspectAgent } from "@/components/agent/inspectagent"
 import { columns } from "@/components/table/columns"
 import { DataTable } from "@/components/table/data-table"
 import Spinner from "@/components/ui/spinner"
+import { useWebSocket } from "@/lib/context/websocket-provider"
 import { getChatsForUser } from "@/lib/utils"
+import { StateStatus } from "@/types/types"
 import { useQuery } from "@tanstack/react-query"
-import { Conversation, StateStatus } from "@/types/types"
-import { InspectAgent } from "@/components/agent/inspectagent"
 
 // const data: Conversation[] = [
 //   {
@@ -672,6 +673,8 @@ export default function Home() {
     totalPrice: chat.total_cost,
   })) || []
 
+  const {dataPoints} = useWebSocket()
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center w-full h-full">
@@ -686,7 +689,7 @@ export default function Home() {
         columns={columns} 
         data={tableData} 
       />
-      <InspectAgent states={states.map(state => ({
+      <InspectAgent states={Object.values(dataPoints).map(state => ({
         ...state,
         status: state.status.toLowerCase() as StateStatus
       }))} />

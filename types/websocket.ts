@@ -18,6 +18,7 @@ export type WebSocketContextType = {
     currentChatId: string | null
     setCurrentChatId: (chatId: string | null) => void
     dataPoints: Record<string, DataPoint>
+    isLive: boolean
 }
 
 export type WebSocketMessage = {

@@ -71,20 +71,29 @@ export const wsMessage = async (ws: WebSocket, message: string, onCall = false) 
         const thread = await db.chatThread.findUnique({
             where: { id: parsedMessage.data.chatId }
         });
+        
+        console.log(thread);
 
         const account = await db.account.findFirst({
             where: { 
-                userId: thread?.userId
+                OR: [
+                    { userId: thread?.userId },
+                    { id: thread?.accountId }
+                ]
             }
         });
 
+        console.log(account);
+
         if (!thread) {
             ws.send(JSON.stringify({ error: 'Thread not found' }));
+            console.error('Thread not found');
             return;
         }
 
         if (!account) {
             ws.send(JSON.stringify({ error: 'Account not found' }));
+            console.error('Account not found');
             return;
         }
         
@@ -265,10 +274,10 @@ export const wsMessage = async (ws: WebSocket, message: string, onCall = false) 
             const completionVotes = responses.filter(r => r.isComplete).length;
             const isComplete = responses.length >= 2 && completionVotes > responses.length / 2;
 
-            // Calculate total usage for the best response
-            const totalInputTokens = Object.values(modelUsage).reduce((sum, usage) => sum + usage.input, 0);
-            const totalOutputTokens = Object.values(modelUsage).reduce((sum, usage) => sum + usage.output, 0);
-            const totalCost = Object.values(modelUsage).reduce((sum, usage) => sum + usage.cost, 0);
+            // Calculate total usage with null checks and defaults
+            const totalInputTokens = Object.values(modelUsage).reduce((sum, usage) => sum + (usage.input || 0), 0);
+            const totalOutputTokens = Object.values(modelUsage).reduce((sum, usage) => sum + (usage.output || 0), 0);
+            const totalCost = Object.values(modelUsage).reduce((sum, usage) => sum + (usage.cost || 0), 0);
 
             console.log('parsedMessage.data.message', parsedMessage.data.message);
             // Modified database transaction to include usage data
@@ -284,10 +293,10 @@ export const wsMessage = async (ws: WebSocket, message: string, onCall = false) 
                             threadId: parsedMessage.data.chatId,
                             content: bestResponse.bestResponse.response,
                             sender: 'ASSISTANT',
-                            inputTokenUsage: totalInputTokens,
-                            outputTokenUsage: totalOutputTokens,
-                            cost: totalCost,
-                            modelName: Object.keys(modelUsage).join(',') // Store all models used
+                            inputTokenUsage: Math.max(0, totalInputTokens),
+                            outputTokenUsage: Math.max(0, totalOutputTokens),
+                            cost: Math.max(0, totalCost),
+                            modelName: Object.keys(modelUsage).join(',')
                         }
                     ]
                 }),

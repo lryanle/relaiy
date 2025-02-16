@@ -2,6 +2,7 @@
 
 import { SignInModal } from "@/components/auth/sign-in-modal"
 import { SignUpModal } from "@/components/auth/sign-up-modal"
+import { NewChatModal } from "@/components/chat/new-chat-modal"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -45,7 +46,6 @@ export default function Navbar() {
   }
 
   const breadcrumbs = getBreadcrumbs()
-
   const { user, signOut } = useAuth();
 
   return (
@@ -80,31 +80,34 @@ export default function Navbar() {
         <ThemeToggle />
 
         {user ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger className="focus:outline-none">
-              <Avatar>
-                <AvatarImage src={user.image ?? undefined} />
-                <AvatarFallback>
-                  <User className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              sideOffset={8}
-              className="w-[280px] sm:w-80 bg-background border-border rounded-lg shadow-lg"
-            >
-              <DropdownMenuItem>
-                <div className="flex flex-col space-y-1">
-                  <p className="font-medium">{user.name}</p>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => signOut()}>
-                Sign Out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <>
+            <NewChatModal />
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus:outline-none">
+                <Avatar>
+                  <AvatarImage src={user.image ?? undefined} />
+                  <AvatarFallback>
+                    <User className="h-4 w-4" />
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                sideOffset={8}
+                className="w-[280px] sm:w-80 bg-background border-border rounded-lg shadow-lg"
+              >
+                <DropdownMenuItem>
+                  <div className="flex flex-col space-y-1">
+                    <p className="font-medium">{user.name}</p>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => signOut()}>
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
         ) : (
           <div className="flex items-center gap-2">
             <SignInModal />

@@ -8,45 +8,51 @@ datasource db {
 }
 
 model ChatMessage {
-  id         Int        @id @default(autoincrement())
-  content    String
-  sender     Sender
-  timestamp  DateTime   @default(now())
-  threadId   Int
-  ChatThread ChatThread @relation(fields: [threadId], references: [id])
+  id               String     @id
+  threadId         String
+  content          String
+  sender           Sender
+  inputTokenUsage  Int        @default(0)
+  outputTokenUsage Int        @default(0)
+  cost             Float      @default(0)
+  modelName        String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @default(now())
+  ChatThread       ChatThread @relation(fields: [threadId], references: [id])
 }
 
 model ChatThread {
-  id          Int           @id @default(autoincrement())
-  createdAt   DateTime      @default(now())
-  ChatMessage ChatMessage[]
-}
-
-enum Sender {
-  USER
-  ASSISTANT
+  id           String        @id
+  createdAt    DateTime      @default(now())
+  status       ThreadStatus  @default(ACTIVE)
+  channels     ChannelType   @default(SMS)
+  goal         String
+  userId       String
+  destination  String
+  type         ChannelType
+  requirements String[]
+  tones        String[]
+  ChatMessage  ChatMessage[]
 }
 
 model User {
   id            String    @id
   name          String
-  email         String
+  email         String    @unique
   emailVerified Boolean
   image         String?
   createdAt     DateTime
   updatedAt     DateTime
-  sessions      Session[]
   accounts      Account[]
+  sessions      Session[]
 
-
-  @@unique([email])
   @@map("user")
 }
 
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime
   updatedAt DateTime
   ipAddress String?
@@ -54,7 +60,6 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@map("session")
 }
 
@@ -63,7 +68,6 @@ model Account {
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -73,6 +77,7 @@ model Account {
   password              String?
   createdAt             DateTime
   updatedAt             DateTime
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("account")
 }
@@ -86,4 +91,21 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+enum Sender {
+  USER
+  ASSISTANT
+}
+
+enum ChannelType {
+  SMS
+  VOICE
+  EMAIL
+}
+
+enum ThreadStatus {
+  ACTIVE
+  INACTIVE
+  COMPLETED
 }

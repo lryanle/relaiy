@@ -15,6 +15,7 @@ model ChatThread {
   channels           ChannelType         @default(SMS)
   goal               String
   userId             String
+  accountId          String
   destination        String
   type               ChannelType
   messages           ChatMessage[]

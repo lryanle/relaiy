@@ -14,24 +14,37 @@ enum ThreadStatus {
   COMPLETED
 }
 
+enum ChannelType {
+  SMS
+  VOICE
+  EMAIL
+}
+
 model ChatThread {
-  id        Int           @id @default(autoincrement())
-  createdAt DateTime      @default(now())
-  status    ThreadStatus  @default(ACTIVE)
-  messages  ChatMessage[]
+  id          String        @id @default(uuid())
+  createdAt   DateTime      @default(now())
+  status      ThreadStatus  @default(ACTIVE)
+  messages    ChatMessage[]
+  channels    ChannelType   @default(SMS)
+  goal        String
+  userId      String
+  destination String
+  type        ChannelType
+  tones       String[]
+  requirements String[]
 }
 
 model ChatMessage {
-  id        Int        @id @default(autoincrement())
+  id        String     @id @default(uuid())
   content   String
   sender    Sender
   timestamp DateTime   @default(now())
-  threadId  Int
+  threadId  String
   thread    ChatThread @relation(fields: [threadId], references: [id])
 }
 
 model account {
-  id                    String    @id
+  id                    String    @id @default(uuid())
   accountId             String
   providerId            String
   userId                String
@@ -48,7 +61,7 @@ model account {
 }
 
 model session {
-  id        String   @id
+  id        String   @id @default(uuid())
   expiresAt DateTime
   token     String   @unique
   createdAt DateTime
@@ -60,7 +73,7 @@ model session {
 }
 
 model user {
-  id            String    @id
+  id            String    @id @default(uuid())
   name          String
   email         String    @unique
   emailVerified Boolean
@@ -72,7 +85,7 @@ model user {
 }
 
 model verification {
-  id         String    @id
+  id         String    @id @default(uuid())
   identifier String
   value      String
   expiresAt  DateTime

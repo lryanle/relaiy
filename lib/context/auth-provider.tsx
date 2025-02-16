@@ -4,19 +4,9 @@
 
 import { toast } from "@/hooks/use-toast";
 import { authClient } from "@/lib/auth-client";
+import { AuthContextType } from "@/types/auth";
 import { User } from "@prisma/client";
 import { createContext, useContext, useEffect, useState } from "react";
-
-type AuthContextType = {
-    user: User | null;
-    isLoading: boolean;
-    error: string | null;
-    signIn: (email: string, password: string) => void;
-    signInWithGithub: () => void;
-    signInWithDiscord: () => void;
-    signUp: (email: string, password: string, name: string) => void;
-    signOut: () => void;
-};
 
 export const AuthContext = createContext<AuthContextType>({
     user: null,
@@ -27,6 +17,8 @@ export const AuthContext = createContext<AuthContextType>({
     signInWithDiscord: () => {},
     signUp: () => {},
     signOut: () => {},
+    isPending: true,
+    refetch: () => {}
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -179,7 +171,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             signInWithGithub,
             signInWithDiscord,
             signUp, 
-            signOut 
+            signOut,
+            isPending,
+            refetch
         }}>
             {children}
         </AuthContext.Provider>

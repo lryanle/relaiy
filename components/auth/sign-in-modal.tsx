@@ -13,13 +13,13 @@ import { useState } from "react"
 import { FaDiscord, FaGithub } from "react-icons/fa"
 
 export function SignInModal() {
-    const { signInWithGithub, signInWithDiscord } = useAuth()
+    const { signInWithGithub, signInWithDiscord, isPending } = useAuth()
     const [open, setOpen] = useState(false)
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline">Sign In</Button>
+                <Button variant="outline" disabled={isPending}>Sign In</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>

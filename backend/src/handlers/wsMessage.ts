@@ -74,9 +74,7 @@ export const wsMessage = async (ws: WebSocket, message: string, onCall = false) 
 
         const account = await db.account.findFirst({
             where: { 
-                chatThreads: { 
-                    some: { id: thread?.id } 
-                } 
+                userId: thread?.userId
             }
         });
 

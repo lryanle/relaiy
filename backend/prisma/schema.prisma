@@ -16,7 +16,6 @@ model ChatThread {
   goal               String
   userId             String
   accountId          String
-  account            account             @relation(fields: [accountId], references: [accountId])
   destination        String
   type               ChannelType
   messages           ChatMessage[]
@@ -66,7 +65,6 @@ model account {
   user                  user      @relation(fields: [userId], references: [id], onDelete: Cascade)
   requirements          String[]
   tones                 String[]
-  chatThreads           ChatThread[]
 }
 
 model session {

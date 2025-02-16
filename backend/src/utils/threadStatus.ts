@@ -11,7 +11,7 @@ export async function markInactiveThreads() {
       messages: {
         some: {
           sender: 'USER',
-          timestamp: {
+          createdAt: {
             lt: fiveMinutesAgo
           }
         }

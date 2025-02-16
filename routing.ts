@@ -1,4 +1,4 @@
-import { Home, ChartArea, Wallet, Settings2, BookText, HelpCircle, Settings } from "lucide-react";
+import { Home, ChartArea, Wallet, Settings2, Settings, Info } from "lucide-react";
 import { Route } from "@/types/types";
 export const groups = [
   "Overview", "Modifications"
@@ -36,9 +36,9 @@ export const routes: Route[] = [
     group: "Settings",
   },
   {
-    name: "Help",
-    icon: HelpCircle,
-    href: "/help",
+    name: "Info",
+    icon: Info,
+    href: "/info",
     group: "Settings",
   }
 ]

@@ -1,5 +1,7 @@
 "use client";
 
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { Icons } from "@/components/icons";
 import NavItem from "@/components/nav/navitem";
 import Status from "@/components/status";
@@ -9,9 +11,11 @@ import { cn, formatReceipientId, formatTimeAgo, getChatsForUser } from "@/lib/ut
 import { routes } from "@/routing";
 import { ChatTab } from "@/types/chat";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeftFromLine, Menu } from "lucide-react";
+import { ArrowLeftFromLine, Copy, HelpCircle, Info, Menu, Settings } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 //! TODO: CONNECT TO ROUTE
 
 
@@ -242,11 +246,67 @@ export default function Sidebar() {
 
           <div className={`py-4 border-t border-gray-200 dark:border-[#1F1F23] ${isSidebarOpen ? "px-4" : "px-2"} transform transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1.0)]`}>
             <div className="space-y-1">
-              {routes.filter((route) => route.group === "Settings").map((route) => (
-                <NavItem key={route.name} href={route.href} icon={route.icon} handleNavigation={handleNavigation} collapsed={!isSidebarOpen}>
-                  {route.name}
-                </NavItem>
-              ))}
+              <NavItem key={"Settings"} href={"/settings"} icon={Settings} handleNavigation={handleNavigation} collapsed={!isSidebarOpen}>
+                Settings
+              </NavItem>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
+                    )}
+                  >
+                    <Info className="h-4 w-4" />
+                    {!isSidebarOpen ? null : <span>Info</span>}
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Information</DialogTitle>
+                    <DialogDescription>
+                      Howdy, and thank you for trying <code>relaiy</code>! You're probably here from a friend's github or from Devpost. While we have your attention, thank you for checking out our project!
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="grid gap-2">
+                      <h3 className="font-medium">Devpost</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        This project was built during Hacklahoma 2025 at the University of Oklahoma.
+                      </p>
+                      <span className="w-full flex justify-evenly items-center gap-2 py-2">
+                          <Link href="https://github.com/lryanle/relai-y">
+                            <Button >
+                              View on Github
+                            </Button>
+                          </Link>
+                          <Link href="https://devpost.com/software/relaiy">
+                            <Button variant="outline">
+                              View the Devpost
+                            </Button>
+                          </Link>
+                      </span>
+                    </div>
+                    <div className="grid gap-2">
+                      <h3 className="font-medium">Credits</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        This project was built by <Link className="text-blue-500" href="https://github.com/lryanle">Ryan Lahlou</Link>, <Link className="text-blue-500" href="https://github.com/phamleduy04">Duy Pham</Link>, and <Link className="text-blue-500" href="https://github.com/BlueStarBurst">Bryant Hargreaves</Link>.
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Inspiration for this project was derived from <Link href="https://devpost.com/software/social-stockfish-yd1k23">Social Stockfish</Link>, a project from <Link href="https://devfest2025.devpost.com/">Columbia's DevFest 2025</Link>.
+                      </p>
+                    </div>
+                  </div>
+                  <DialogFooter className="sm:justify-start">
+                    <DialogClose asChild>
+                      <Button type="button" variant="secondary">
+                        Close
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
             </div>
           </div>
         </div>

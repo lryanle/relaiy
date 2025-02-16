@@ -1,18 +1,31 @@
 "use client"
 
-import { PieChart, Pie, Cell, Legend } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { useEffect, useState } from "react"
+import { Cell, Legend, Pie, PieChart } from "recharts"
 
-interface CostByTypeProps {
-  data: {
-    name: string
-    cost: number
-  }[]
+interface CostByTypeData {
+  type: string
+  cost: number
 }
 
-const COLORS = ["hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-1))", "hsl(var(--chart-4))"]
+export default function CostByType() {
+  const [data, setData] = useState<CostByTypeData[]>([])
 
-export default function CostByType({ data }: CostByTypeProps) {
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetch('/api/analytics')
+      const result = await response.json()
+      setData(result.costByType.map((item: any) => ({
+        name: item.type,
+        cost: item._sum.cost
+      })))
+    }
+    fetchData()
+  }, [])
+
+  const COLORS = ["hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-1))", "hsl(var(--chart-4))"]
+
   return (
     <ChartContainer
       config={{

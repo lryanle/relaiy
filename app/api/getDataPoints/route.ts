@@ -27,12 +27,18 @@ export async function POST(request: NextRequest) {
         if (!chatId) {
           return NextResponse.json({ error: "Chat ID is required" }, { status: 400 });
         }
+
+        const userIdFromAccount = await prisma.account.findFirst({
+            where: {
+                userId: session.user.id
+            }
+        })
     
         // Get chat thread and messages
         const chatThread = await prisma.chatThread.findFirst({
           where: {
             id: chatId,
-            userId: session.user.id
+            userId: userIdFromAccount?.id
           },
           include: {
             ChatMessage: {
@@ -60,7 +66,7 @@ export async function POST(request: NextRequest) {
             createdAt: {
                 equals: timestamps[newIdx].timestamp
             }
-          }
+          },
         });
 
         console.log(stockfishResponse)
@@ -74,8 +80,8 @@ export async function POST(request: NextRequest) {
             last_activity: chatThread.ChatMessage[chatThread.ChatMessage.length - 1]?.updatedAt ?? chatThread.createdAt,
             message_count: chatThread.ChatMessage.length,
             goal: chatThread.goal,
-            requirements: chatThread.requirements,
-            tones: chatThread.tones,
+            // requirements: chatThread.requirements,
+            // tones: chatThread.tones,
             // Calculate total cost
             total_cost: chatThread.ChatMessage.reduce((sum, msg) => sum + (msg.cost || 0), 0)
         }

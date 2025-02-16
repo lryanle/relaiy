@@ -19,11 +19,18 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Chat ID is required" }, { status: 400 });
     }
 
+
+    const userIdFromAccount = await prisma.account.findFirst({
+      where: {
+        userId: session.user.id
+      }
+    })
+
     // Get chat thread and messages
     const chatThread = await prisma.chatThread.findFirst({
       where: {
         id: chatId,
-        userId: session.user.id
+        userId: userIdFromAccount?.id
       },
       include: {
         ChatMessage: {

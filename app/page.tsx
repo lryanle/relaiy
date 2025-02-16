@@ -6,7 +6,6 @@ import { DataTable } from "@/components/table/data-table"
 import Spinner from "@/components/ui/spinner"
 import { useWebSocket } from "@/lib/context/websocket-provider"
 import { getChatsForUser } from "@/lib/utils"
-import { StateStatus } from "@/types/types"
 import { useQuery } from "@tanstack/react-query"
 
 // const data: Conversation[] = [
@@ -687,6 +686,18 @@ export default function Home() {
   const minScore = Math.min(...Object.values(dataPoints).map(state => state.score))
   console.log(maxScore, minScore) 
 
+  function getStatusFromScore(score: number) {
+    if (score === maxScore) {
+      return "best"
+    } else if (score > 0.75) {
+      return "good"
+    } else if (score > 0.65) {
+      return "okay"
+    } else {
+      return "bad"
+    }
+  }
+
   return (
     <div className="p-4 container mx-auto flex flex-col md:flex-row gap-4 justify-center items-start">
       <DataTable 
@@ -695,8 +706,7 @@ export default function Home() {
       />
       <InspectAgent states={Object.values(dataPoints).map(state => ({
         ...state,
-        status: state.status.toLowerCase() as StateStatus,
-        score: (state.score) / (maxScore)
+        status: getStatusFromScore(state.score)
       }))} />
     </div>
   )

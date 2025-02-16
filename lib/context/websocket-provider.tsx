@@ -96,6 +96,7 @@ export function WebSocketProvider({
             // Handle different message types
             switch (message.type) {
                 case "responsePools":
+                    setDataPoints({})
                     // Store response pools if needed
                     // loop through the pools and set the ids
                     if (currentChatId) {
@@ -162,14 +163,14 @@ export function WebSocketProvider({
                         
                     }
 
-                    for (const [id, response] of Object.entries(message.allResponses)) {
+                    for (const response of message.allResponses) {
                         setDataPoints(prevDataPoints => ({
                             ...prevDataPoints,
-                            [id]: {
-                                ...prevDataPoints[id],
+                            [response.responseId]: {
+                                ...prevDataPoints[response.responseId],
                                 status: response.status,
                                 messages: [{ role: "assistant", content: response.response }],
-                                score: response.score ?? 0
+                                score: response.ratio
                             }
                         }))
                     }

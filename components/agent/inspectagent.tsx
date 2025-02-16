@@ -68,6 +68,8 @@ export function InspectAgent({ states, title = "Conversation Evaluation" }: Insp
 
   const getMCColor = (status: ConversationState["status"]) => {
     switch (status) {
+      case "best":
+        return randomBlue();
       case "good":
         return randomGreen();
       case "okay":

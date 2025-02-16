@@ -14,7 +14,6 @@ interface Navigationprops {
 const lexend = Lexend({
   variable: "--font-lexend",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
 });
 
 const oxygenMono = Oxygen_Mono({

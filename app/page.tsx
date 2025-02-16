@@ -714,9 +714,9 @@ export default function Home() {
         onRowClick={setSelectedConvo}
         selectedConvo={selectedConvo}
       />
-      {selectedConvo && <InspectAgent setSelectedConvo={setSelectedConvo} selectedConvo={selectedConvo} states={states.map(state => ({
+      {selectedConvo && <InspectAgent setSelectedConvo={setSelectedConvo} selectedConvo={selectedConvo} states={Object.values(dataPoints).map(state => ({
         ...state,
-        status: state.status.toLowerCase() as StateStatus
+        status: getStatusFromScore(state.score)
       }))} />}
     </div>
   )

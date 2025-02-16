@@ -67,9 +67,9 @@ export const getCost = async (): Promise<number> => {
 }
 
 export function formatReceipientId(id: string, type: Channel) {
-  if (type === "Voice" || type === "SMS") {
+  if (type === "voice" || type === "sms") {
     return `+1 (${id.slice(0, 3)}) ${id.slice(3, 6)}-${id.slice(6, 10)}`;
-  } else if (type === "Discord") {
+  } else if (type === "discord") {
     return `@${id}`;
   }
   return id;

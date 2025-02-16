@@ -1,7 +1,7 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { Conversation, Channel, Status } from "@/types/types"
+import { Conversation, Status } from "@/types/types"
 import { Mail, MessageCircle, Phone, CircleHelp } from "lucide-react"
 import { FaDiscord } from "react-icons/fa"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
@@ -10,13 +10,13 @@ import TimeEmbed from "@/components/timeembed"
 
 const getChannelIcon = (channel: Conversation["channel"]) => {
   switch (channel) {
-    case "Voice":
+    case "voice":
       return <Phone className="w-6 h-6" />
-    case "SMS":
+    case "sms":
       return <MessageCircle className="w-6 h-6" />
-    case "Email":
+    case "email":
       return <Mail className="w-6 h-6" />
-    case "Discord":
+    case "discord":
       return <FaDiscord className="w-6 h-6" />
     default:
       return <CircleHelp className="w-8 h-8" />
@@ -40,16 +40,15 @@ export const columns: ColumnDef<Conversation>[] = [
   {
     accessorKey: "channel",
     header: "Type",
+    maxSize: 80,
+    size: 80,
     cell: ({ row }) => {
       const channel = row.getValue("channel") as Conversation["channel"]
       return (
-        // <Badge variant="outline" className={`px-1 group font-semibold`}>
-        //   <span className="mr-1">{getChannelIcon(channel)}</span> {channel}
-        // </Badge>
         <TooltipProvider>
           <Tooltip delayDuration={0}>
-            <TooltipTrigger>
-              <span className={`cursor-help p-2 pr-2.5 mr-4 flex items-center justify-start ${row.original.status === "Active" ? "bg-green-500/15 text-green-500 border-green-500/30" : row.original.status === "Complete" ? "bg-slate-500/15 text-slate-500 border-slate-500/30" : "bg-amber-500/15 text-amber-500 border-amber-500/30"}`}>{getChannelIcon(channel)}</span>
+            <TooltipTrigger className="h-full">
+              <span className={`h-full cursor-help p-2 pr-2.5 flex items-center justify-start ${row.original.status === "active" ? "bg-green-500/15 text-green-500 border-green-500/30" : row.original.status === "complete" ? "bg-slate-500/15 text-slate-500 border-slate-500/30" : "bg-amber-500/15 text-amber-500 border-amber-500/30"}`}>{getChannelIcon(channel)}</span>
             </TooltipTrigger>
             <TooltipContent side="right" sideOffset={0}>
               <div className="flex flex-col items-start">
@@ -65,10 +64,12 @@ export const columns: ColumnDef<Conversation>[] = [
   {
     accessorKey: "recipient",
     header: "Recipient",
+    size: 160,
+    maxSize: 160,
     cell: ({ row }) => {
       const recipient = row.getValue("recipient") as string
       return (
-        <div className="select-all px-3 py-1 w-min font-[family-name:var(--font-oxygen-mono)] bg-gray-100 dark:bg-[#1F1F23] rounded-md">
+        <div className="select-all px-3 py-1 w-fit font-[family-name:var(--font-oxygen-mono)] bg-gray-100 dark:bg-[#1F1F23] rounded-md whitespace-nowrap">
           {recipient}
         </div>
       )
@@ -77,21 +78,24 @@ export const columns: ColumnDef<Conversation>[] = [
   {
     accessorKey: "goal",
     header: "Conversational Goal",
+    size: 999,
     cell: ({ row }) => {
       const goal = row.getValue("goal") as string
-      return <span className="px-2">{goal}</span>
+      return <span className="px-4 py-1 block whitespace-normal overflow-y-scroll max-h-10">{goal}</span>
     },
   },
   {
     accessorKey: "lastActivity",
     header: "Last Activity",
+    size: 120,
+    maxSize: 120,
     cell: ({ row }) => {
       const date = row.getValue("lastActivity") as Date
       return (
         <TooltipProvider>
           <Tooltip delayDuration={0}>
             <TooltipTrigger>
-              <TimeEmbed className="cursor-help px-2" timestamp={date.getTime()} />
+              <TimeEmbed className="cursor-help px-4 whitespace-nowrap" timestamp={date.getTime()} />
             </TooltipTrigger>
             <TooltipContent side="left" sideOffset={0}>
               <div className="flex flex-col items-start">
@@ -105,18 +109,22 @@ export const columns: ColumnDef<Conversation>[] = [
   },
   {
     accessorKey: "messageCount",
-    header: "Messages",
+    header: "# Msgs",
+    size: 100,
+    maxSize: 100,
     cell: ({ row }) => {
       const count = row.getValue("messageCount") as number
-      return <span className="px-2">{count}</span>
+      return <span className="px-4 text-left block w-full whitespace-nowrap">{count}</span>
     },
   },
   {
     accessorKey: "totalPrice",
-    header: "Total Price",
+    header: "Σ Price",
+    size: 100,
+    maxSize: 100,
     cell: ({ row }) => {
       const amount = Number.parseFloat(row.getValue("totalPrice"))
-      return <span className="px-2">{formatCurrency(amount)}</span>
+      return <span className="px-4 text-left block w-full whitespace-nowrap">{formatCurrency(amount)}</span>
     },
   },
 ]

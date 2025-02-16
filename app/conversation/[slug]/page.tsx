@@ -36,7 +36,7 @@ export default function Chat({ params }: { params: Promise<{ slug: string }> }) 
   }
 
   return (
-    <div className="flex flex-col h-full w-full relative">
+    <div className="flex flex-col h-full w-full">
       <ChatBody chatId={slug} messages={messages?.messages || []} />
     </div>
   )

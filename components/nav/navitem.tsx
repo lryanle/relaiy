@@ -7,6 +7,7 @@ interface NavItemProps {
   children: React.ReactNode;
   handleNavigation?: () => void;
   collapsed?: boolean;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export default function NavItem({
@@ -14,12 +15,13 @@ export default function NavItem({
   icon: Icon,
   children,
   handleNavigation,
-  collapsed
+  collapsed,
+  onClick
 }: NavItemProps) {
   return (
     <Link
       href={href}
-      onClick={handleNavigation}
+      onClick={onClick ? onClick : handleNavigation}
       className={`
         group w-full flex items-center px-3 py-2 text-sm rounded-md
         text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white

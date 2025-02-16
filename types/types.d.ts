@@ -1,6 +1,6 @@
 export type Group = "Overview" | "Modifications" | "Settings";
 export type Channel = "Voice" | "SMS" | "Email" | "Discord"
-export type Status = "Active" | "Inactive" | "Complete"
+export type Status = "active" | "inactive" | "complete"
 
 export type Route = {
     name: string;

@@ -6,8 +6,10 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/lib/context/auth-provider"
-import { Bell, ChevronRight, User } from "lucide-react"
+import { createNewChat } from "@/lib/utils"
+import { Bell, ChevronRight, Plus, User } from "lucide-react"
 import Link from "next/link"
+import { Button } from "../ui/button"
 
 interface BreadcrumbItem {
   label: string
@@ -52,7 +54,11 @@ export default function Navbar() {
 
         <ThemeToggle />
 
-        {user ? (
+        {user ? (<>
+        <Button variant="outline" onClick={createNewChat}>
+          <Plus className="h-4 w-4" />
+          New C-Agent
+        </Button>
           <DropdownMenu>
             <DropdownMenuTrigger className="focus:outline-none">
               <Avatar>
@@ -78,6 +84,7 @@ export default function Navbar() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          </>
         ) : (
           <div className="flex items-center gap-2">
             <SignInModal />

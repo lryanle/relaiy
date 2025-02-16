@@ -78,7 +78,7 @@ export const wsMessage = async (ws: WebSocket, message: string, onCall = false) 
             where: { 
                 OR: [
                     { userId: thread?.userId },
-                    { id: thread?.accountId }
+                    { id: thread?.userId }
                 ]
             }
         });

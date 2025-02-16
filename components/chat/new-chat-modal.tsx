@@ -60,7 +60,7 @@ export function NewChatModal() {
       if (chats) {
         await queryClient.invalidateQueries({ queryKey: ["chats"] })
         console.log(chats)  
-        router.push(`/chat/${chats.id}`)
+        router.push(`/conversation/${chats.id}`)
         setOpen(false)
       }
     } catch (error) {

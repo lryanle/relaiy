@@ -7,6 +7,7 @@ import { getChatsForUser } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 import { Conversation, StateStatus } from "@/types/types"
 import { InspectAgent } from "@/components/agent/inspectagent"
+import { useState } from "react"
 
 // const data: Conversation[] = [
 //   {
@@ -55,7 +56,7 @@ const states = [
   {
     modelType: "gpt-4o",
     status: "pending",
-    messages: [{"role": "user", "content": "hi, this is a test!"}],
+    messages: [{"role": "user", "content": "hi, this is a test!hi, this is a test!hi, this is a test!hi, this is a test!hi, this is a test!"}],
     score: -1
   },
   {
@@ -656,6 +657,7 @@ const states = [
 ]
 
 export default function Home() {
+  const [selectedConvo, setSelectedConvo] = useState<Conversation | null>(null)
   const { data: chats, isLoading } = useQuery({
     queryKey: ["chats"],
     queryFn: getChatsForUser,
@@ -685,11 +687,13 @@ export default function Home() {
       <DataTable 
         columns={columns} 
         data={tableData} 
+        onRowClick={setSelectedConvo}
+        selectedConvo={selectedConvo}
       />
-      <InspectAgent states={states.map(state => ({
+      {selectedConvo && <InspectAgent setSelectedConvo={setSelectedConvo} selectedConvo={selectedConvo} states={states.map(state => ({
         ...state,
         status: state.status.toLowerCase() as StateStatus
-      }))} />
+      }))} />}
     </div>
   )
 }

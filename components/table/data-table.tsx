@@ -5,18 +5,19 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  getPaginationRowModel,
 } from "@tanstack/react-table"
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
+import { Conversation } from "@/types/types"
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends { id: string }, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  onRowClick: (row: TData) => void
+  selectedConvo: Conversation | null
 }
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+export function DataTable<TData extends { id: string }, TValue>({ columns, data, onRowClick, selectedConvo }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
@@ -45,10 +46,10 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className="">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} onClick={() => onRowClick(row.original)} className={`cursor-pointer ${selectedConvo && selectedConvo.id === row.original.id ? "text-blue-500" : ""}`}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell className="p-0" key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                   ))}

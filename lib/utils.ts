@@ -32,7 +32,7 @@ export const getChatsForUser = async (): Promise<ChatTabList | null> => {
 
 // Get specific chat messages
 export const getChat = async (id: string): Promise<{messages: ChatMessage[]}> => {
-    const response = await fetch(`/api/chat?chatId=${id}`)
+    const response = await fetch(`/api/conversation?chatId=${id}`)
     const data = await response.json()
     
     if (data.error) {

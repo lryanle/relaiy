@@ -1,6 +1,10 @@
-import { cn } from "@/lib/utils";
-import { StateStatus } from "@/types/types";
+import { cn, formatReceipientId } from "@/lib/utils";
+import { Conversation, StateStatus } from "@/types/types";
 import { useMemo } from "react";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
 
 interface Message {
   role: string;
@@ -23,9 +27,11 @@ interface ConversationState {
 interface InspectAgentProps {
   states: ConversationState[];
   title?: string;
+  selectedConvo: Conversation;
+  setSelectedConvo?: (convo: Conversation | null) => void;
 }
 
-export function InspectAgent({ states, title = "Conversation Evaluation" }: InspectAgentProps) {
+export function InspectAgent({ selectedConvo, states, title = "Conversation Evaluation", setSelectedConvo }: InspectAgentProps) {
 
   const randomBlue = () => {
     const choices = ["bg-blue-700", "bg-blue-600"];
@@ -80,17 +86,27 @@ export function InspectAgent({ states, title = "Conversation Evaluation" }: Insp
   };
 
   const analysisSection = useMemo(() => {
-    if (!states[0]?.analysis) return null;
+    if (!states.length) return null;
+    
+    const topStates = [...states].sort((a, b) => b.score - a.score);
+    const threshold = topStates[Math.floor(topStates.length * 0.3)]?.score;
     
     return (
       <div className="space-y-2">
-        <h3 className="text-sm font-medium text-gray-500">ANALYSIS</h3>
-        <div className="space-y-1">
-          {states[0].analysis.map((item, index) => (
-            <div key={index} className="flex items-center justify-between">
-              <span className="text-sm text-gray-700">{item.label}</span>
-              <span className="text-sm font-medium text-gray-900">
-                {item.score.toFixed(2)}
+        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">RESPONSE ANALYSIS</h3>
+        <div className="space-y-1 max-h-20 overflow-y-auto">
+          {topStates.map((state, index) => (
+            <div key={index} className="flex items-start justify-start gap-2">
+              <span className={cn(
+                "px-5 text-sm font-medium rounded-md p-1",
+                state.score >= threshold 
+                  ? "bg-blue-500 text-white" 
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              )}>
+                {state.score.toFixed(2)}
+              </span>
+              <span className="w-full text-sm text-gray-700 dark:text-gray-300">
+                {state.messages[state.messages.length - 1].content}
               </span>
             </div>
           ))}
@@ -100,18 +116,45 @@ export function InspectAgent({ states, title = "Conversation Evaluation" }: Insp
   }, [states]);
 
   return (
-    <div className="w-full md:max-w-80 p-6 bg-white dark:bg-[#0F0F12] border border-gray-200 dark:border-[#1F1F23] rounded-lg">
+    <div className="w-full md:max-w-80 p-4 pt-3 bg-white dark:bg-[#0F0F12] border border-gray-200 dark:border-[#1F1F23] rounded-lg relative">
+      
+      {setSelectedConvo && (
+        <Button variant="destructive" size="icon" className="absolute top-3 right-3 w-8 h-8" onClick={() => setSelectedConvo(null)}>
+          <X className="w-4 h-4" strokeWidth={2.5} />
+        </Button>
+      )}
+
       {/* Title Section */}
-      <div className="mb-6">
-        <h2 className="text-xl font-medium text-gray-500">{title}</h2>
+      <div className="mb-3">
+        <h2 className="text-xl font-medium text-gray-900 dark:text-gray-100">{title}</h2>
       </div>
+
+      {selectedConvo && (
+        <div className="mb-2 bg-gray-100 dark:bg-[#1F1F23] rounded-lg p-2 space-y-0.5">
+          <span className="flex justify-between items-center">
+            <h2 className="text-sm font-medium text-gray-900 dark:text-gray-100">SELECTED GOAL</h2>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {formatReceipientId(selectedConvo.recipient, selectedConvo.channel)}
+            </span>
+          </span>
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">"{selectedConvo.goal}"</h3>
+        </div>
+      )}
+
+      <Link href={`/conversation/${selectedConvo?.id}`}>
+        <Button variant="secondary" size="sm" className="w-full" >
+          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">View Full Conversation</span>
+        </Button>
+      </Link>
+
+      <Separator className="my-4" />
 
       {/* Analysis Section */}
       {analysisSection}
 
       {/* State Visualization */}
-      <div className="mt-8">
-        <h3 className="text-sm font-medium text-gray-500 mb-2">CONVERSATION STATE SPACE</h3>
+      <div className="mt-5">
+        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">CONVERSATION STATE SPACE</h3>
         <div className="flex flex-row flex-wrap gap-1 w-full max-w-full">
           {states.map((state, index) => (
             <div
@@ -127,8 +170,8 @@ export function InspectAgent({ states, title = "Conversation Evaluation" }: Insp
       </div>
 
       {/* Monte Carlo Section */}
-      <div className="mt-8 w-full">
-        <h3 className="text-sm font-medium text-gray-500 mb-2">
+      <div className="mt-5 w-full">
+        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
           MONTE CARLO EVALUATION
         </h3>
         <div className="flex flex-row flex-wrap gap-1 w-full max-w-full">

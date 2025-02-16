@@ -217,7 +217,7 @@ export default function Sidebar() {
                     {chats?.map((cagent: ChatTab) => (
                       <Link
                         key={cagent.id + cagent.type + cagent.status + cagent.recipient_address}
-                        href={`/chat/${cagent.id}`}
+                        href={`/conversation/${cagent.id}`}
                         className="gap-4 animate-in fade-in-0 duration-300 w-full flex justify-start items-center px-3 py-1 text-sm rounded-md transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
                       >
                         <Status status={cagent.status } />

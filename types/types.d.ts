@@ -1,5 +1,5 @@
 export type Group = "Overview" | "Modifications" | "Settings";
-export type Channel = "Voice" | "SMS" | "Email" | "Discord"
+export type Channel = "voice" | "sms" | "email" | "discord"
 export type Status = "active" | "inactive" | "complete"
 
 export type Route = {

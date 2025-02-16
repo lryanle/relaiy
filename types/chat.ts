@@ -49,6 +49,7 @@ export type ChatTab = {
     status: Status
     tones: string[]
     type: Channel
+    total_cost: number
 }
 
 export type ChatTabList = ChatTab[]

@@ -50,16 +50,16 @@ export default function Navbar() {
 
   return (
     <nav className="px-3 sm:px-6 flex items-center justify-between bg-white dark:bg-[#0F0F12] border-b border-gray-200 dark:border-[#1F1F23] h-full">
-      <div className="font-medium text-sm hidden sm:flex items-center space-x-1 truncate max-w-[300px]">
+      <div className="font-medium text-sm hidden sm:flex items-center truncate max-w-[300px]">
         <Breadcrumb>
-          <BreadcrumbList>
+          <BreadcrumbList className="flex-nowrap whitespace-nowrap">
             {breadcrumbs.map((item, index) => (
-              <BreadcrumbItem key={item.href}>
+              <BreadcrumbItem key={item.href} className="flex-shrink-0">
                 {index === breadcrumbs.length - 1 ? (
-                  <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                  <BreadcrumbPage className="truncate">{item.label}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink>
-                    <Link href={item.href}>{item.label}</Link>
+                    <Link href={item.href} className="truncate">{item.label}</Link>
                   </BreadcrumbLink>
                 )}
                 {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}

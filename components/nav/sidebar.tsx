@@ -105,24 +105,26 @@ export default function Sidebar() {
     <>
       <button
         type="button"
-        className="lg:hidden fixed top-4 left-4 z-[70] p-2 rounded-lg bg-white dark:bg-[#0F0F12] shadow-md"
+        className="lg:hidden fixed top-3 left-3 z-[70] p-2 rounded-lg bg-white dark:bg-[#0F0F12] shadow-md"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       >
         <Menu className="h-5 w-5 text-gray-600 dark:text-gray-300" />
       </button>
       <nav
         className={`
-          fixed inset-y-0 left-0 z-[40] bg-white dark:bg-[#0F0F12]
+          fixed inset-y-0 left-0 z-[60] bg-white dark:bg-[#0F0F12]
           transform transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1.0)]
-          lg:translate-x-0 lg:static border-r border-gray-200 dark:border-[#1F1F23]
+          lg:translate-x-0 border-r border-gray-200 dark:border-[#1F1F23]
           ${isSidebarOpen ? 'w-64' : 'w-16'}
+          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          lg:relative
         `}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         <div className="h-full flex flex-col">
           <div className={`
-            h-16 w-full ${isSidebarOpen ? "pl-6" : "pl-2"} pr-2 flex items-center 
+            h-16 w-full ${isSidebarOpen ? "md:pl-6" : "pl-2"} pr-2 flex items-center justify-center md:justify-start 
             border-b border-gray-200 dark:border-[#1F1F23]
             transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1.0)]
           `}>
@@ -154,7 +156,7 @@ export default function Sidebar() {
               variant="ghost" 
               size="icon" 
               className={`
-                ml-auto h-9 w-9 p-0
+                ml-auto h-9 w-9 p-0 hidden md:flex
                 transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1.0)]
                 ${!isSidebarOpen ? 'opacity-0 scale-75 w-0' : 'opacity-100 scale-100'}
               `}
@@ -247,7 +249,7 @@ export default function Sidebar() {
 
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-[65] lg:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-[55] lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}

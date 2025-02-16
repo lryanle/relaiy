@@ -28,9 +28,15 @@ twilioRouter.post('/',
             return;
         }
 
+        console.log(wsClients);
+
         
         // Find WebSocket client with userId "1" and send the message
-        const ws = wsClients.get(chat?.userId);
+        let ws = wsClients.get(chat?.userId);
+
+        if (!ws) {
+            ws = wsClients.get(chat?.accountId);
+        }
 
 
         if (ws) {

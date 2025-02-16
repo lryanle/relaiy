@@ -13,6 +13,7 @@ type AuthContextType = {
     error: string | null;
     signIn: (email: string, password: string) => void;
     signInWithGithub: () => void;
+    signInWithDiscord: () => void;
     signUp: (email: string, password: string, name: string) => void;
     signOut: () => void;
 };
@@ -23,6 +24,7 @@ export const AuthContext = createContext<AuthContextType>({
     error: null,
     signIn: () => {},
     signInWithGithub: () => {},
+    signInWithDiscord: () => {},
     signUp: () => {},
     signOut: () => {},
 });
@@ -96,6 +98,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         })
     }
 
+    function signInWithDiscord() {
+        toast({
+            title: "Signing in",
+            description: "Redirecting to Discord...",
+        });
+        
+        authClient.signIn.social({
+            provider: "discord",
+        })
+    }
+
     function signUp(email: string, password: string, name: string) {
         toast({
             title: "Creating account",
@@ -158,6 +171,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             error: errorMessage,
             signIn, 
             signInWithGithub,
+            signInWithDiscord,
             signUp, 
             signOut 
         }}>

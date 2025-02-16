@@ -74,17 +74,19 @@ export const wsMessage = async (ws: WebSocket, message: string, onCall = false) 
 
         const account = await db.account.findFirst({
             where: { 
-                userId: thread?.userId
+                id: thread?.userId
             }
         });
 
         if (!thread) {
             ws.send(JSON.stringify({ error: 'Thread not found' }));
+            console.error('Thread not found');
             return;
         }
 
         if (!account) {
             ws.send(JSON.stringify({ error: 'Account not found' }));
+            console.error('Account not found');
             return;
         }
         
@@ -284,9 +286,9 @@ export const wsMessage = async (ws: WebSocket, message: string, onCall = false) 
                             threadId: parsedMessage.data.chatId,
                             content: bestResponse.bestResponse.response,
                             sender: 'ASSISTANT',
-                            inputTokenUsage: totalInputTokens,
-                            outputTokenUsage: totalOutputTokens,
-                            cost: totalCost,
+                            inputTokenUsage: totalInputTokens ?? 0,
+                            outputTokenUsage: totalOutputTokens ?? 0,
+                            cost: totalCost ?? 0,
                             modelName: Object.keys(modelUsage).join(',') // Store all models used
                         }
                     ]

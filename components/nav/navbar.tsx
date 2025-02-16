@@ -37,12 +37,19 @@ export default function Navbar() {
       return breadcrumbs
     }
 
-    // Build breadcrumbs array for other routes
-    return paths.map((path, index) => {
+    let breadcrumbs: BreadcrumbItem[] = []
+    
+    if (paths[0] === 'conversation') {
+      breadcrumbs.push({ label: "Dashboard", href: "/" })
+    }
+
+    paths.forEach((path, index) => {
       const href = `/${paths.slice(0, index + 1).join('/')}`
       const label = path.charAt(0).toUpperCase() + path.slice(1)
-      return { label, href }
+      breadcrumbs.push({ label, href })
     })
+
+    return breadcrumbs
   }
 
   const breadcrumbs = getBreadcrumbs()
@@ -50,7 +57,7 @@ export default function Navbar() {
 
   return (
     <nav className="px-3 sm:px-6 flex items-center justify-between bg-white dark:bg-[#0F0F12] border-b border-gray-200 dark:border-[#1F1F23] h-full">
-      <div className="font-medium text-sm hidden sm:flex items-center truncate max-w-[300px]">
+      <div className="font-medium text-sm hidden sm:flex items-center truncate">
         <Breadcrumb>
           <BreadcrumbList className="flex-nowrap whitespace-nowrap">
             {breadcrumbs.map((item, index) => (
@@ -59,7 +66,7 @@ export default function Navbar() {
                   <BreadcrumbPage className="truncate">{item.label}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink>
-                    <Link href={item.href} className="truncate">{item.label}</Link>
+                    <Link href={item.href ?? '/'} className="truncate">{item.label}</Link>
                   </BreadcrumbLink>
                 )}
                 {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}

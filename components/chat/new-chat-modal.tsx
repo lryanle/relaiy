@@ -60,7 +60,7 @@ export function NewChatModal() {
       if (chats) {
         await queryClient.invalidateQueries({ queryKey: ["chats"] })
         console.log(chats)  
-        router.push(`/chat/${chats.id}`)
+        router.push(`/conversation/${chats.id}`)
         setOpen(false)
       }
     } catch (error) {
@@ -170,7 +170,7 @@ export function NewChatModal() {
                   <SelectGroup>
                     <SelectLabel>Channel</SelectLabel>
                     {channelTypes.map(({ value, icon: Icon, label }) => (
-                      <SelectItem key={value} value={value}>
+                      <SelectItem key={value} value={value} disabled={formData.type === "DISCORD" || formData.type === "EMAIL"}>
                         <div className="flex items-center gap-2">
                           <Icon className="h-4 w-4" />
                           {label}

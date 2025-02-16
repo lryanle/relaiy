@@ -1,12 +1,12 @@
 "use client"
 
-import type { ColumnDef } from "@tanstack/react-table"
-import { Conversation } from "@/types/types"
-import { Mail, MessageCircle, Phone, CircleHelp } from "lucide-react"
-import { FaDiscord } from "react-icons/fa"
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { formatCurrency, formatDateTime } from "@/lib/utils"
 import TimeEmbed from "@/components/timeembed"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { formatCurrency, formatDateTime, formatReceipientId } from "@/lib/utils"
+import { Conversation } from "@/types/types"
+import type { ColumnDef } from "@tanstack/react-table"
+import { CircleHelp, Mail, MessageCircle, Phone } from "lucide-react"
+import { FaDiscord } from "react-icons/fa"
 
 const getChannelIcon = (channel: Conversation["channel"]) => {
   switch (channel) {
@@ -48,7 +48,7 @@ export const columns: ColumnDef<Conversation>[] = [
         <TooltipProvider>
           <Tooltip delayDuration={0}>
             <TooltipTrigger className="h-full">
-              <span className={`h-full cursor-help p-2 pr-2.5 flex items-center justify-start ${row.original.status === "active" ? "bg-green-500/15 text-green-500 border-green-500/30" : row.original.status === "complete" ? "bg-slate-500/15 text-slate-500 border-slate-500/30" : "bg-amber-500/15 text-amber-500 border-amber-500/30"}`}>{getChannelIcon(channel)}</span>
+              <span className={`h-full cursor-help p-2 pr-2.5 flex items-center justify-start ${row.original.status === "active" ? "bg-green-500/15 text-green-500 border-green-500/30" : row.original.status === "completed" ? "bg-slate-500/15 text-slate-500 border-slate-500/30" : "bg-amber-500/15 text-amber-500 border-amber-500/30"}`}>{getChannelIcon(channel)}</span>
             </TooltipTrigger>
             <TooltipContent side="right" sideOffset={0}>
               <div className="flex flex-col items-start">
@@ -69,8 +69,8 @@ export const columns: ColumnDef<Conversation>[] = [
     cell: ({ row }) => {
       const recipient = row.getValue("recipient") as string
       return (
-        <div className="select-all px-3 py-1 w-fit font-[family-name:var(--font-oxygen-mono)] bg-gray-100 dark:bg-[#1F1F23] rounded-md whitespace-nowrap">
-          {recipient}
+        <div className="select-all px-2 py-1 w-fit bg-gray-100 dark:bg-[#1F1F23] rounded-md whitespace-nowrap">
+          {formatReceipientId(recipient, row.original.channel)}
         </div>
       )
     },
@@ -81,7 +81,7 @@ export const columns: ColumnDef<Conversation>[] = [
     size: 999,
     cell: ({ row }) => {
       const goal = row.getValue("goal") as string
-      return <span className="px-4 py-1 block whitespace-normal overflow-y-scroll max-h-10">{goal}</span>
+      return <span className="px-2 py-1 block whitespace-normal overflow-y-scroll max-h-10">{goal}</span>
     },
   },
   {
@@ -95,7 +95,7 @@ export const columns: ColumnDef<Conversation>[] = [
         <TooltipProvider>
           <Tooltip delayDuration={0}>
             <TooltipTrigger>
-              <TimeEmbed className="cursor-help px-4 whitespace-nowrap" timestamp={date.getTime()} />
+              <TimeEmbed className="cursor-help px-2 whitespace-nowrap" timestamp={date.getTime()} />
             </TooltipTrigger>
             <TooltipContent side="left" sideOffset={0}>
               <div className="flex flex-col items-start">
@@ -114,7 +114,7 @@ export const columns: ColumnDef<Conversation>[] = [
     maxSize: 100,
     cell: ({ row }) => {
       const count = row.getValue("messageCount") as number
-      return <span className="px-4 text-left block w-full whitespace-nowrap">{count}</span>
+      return <span className="px-2 text-left block w-full whitespace-nowrap">{count}</span>
     },
   },
   {
@@ -124,7 +124,7 @@ export const columns: ColumnDef<Conversation>[] = [
     maxSize: 100,
     cell: ({ row }) => {
       const amount = Number.parseFloat(row.getValue("totalPrice"))
-      return <span className="px-4 text-left block w-full whitespace-nowrap">{formatCurrency(amount)}</span>
+      return <span className="px-2 text-left block w-full whitespace-nowrap">{formatCurrency(amount)}</span>
     },
   },
 ]

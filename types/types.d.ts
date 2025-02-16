@@ -1,6 +1,7 @@
 export type Group = "Overview" | "Modifications" | "Settings";
 export type Channel = "voice" | "sms" | "email" | "discord"
-export type Status = "active" | "inactive" | "complete"
+export type Status = "active" | "inactive" | "completed"
+export type StateStatus = "pending" | "error" | "bad" | "okay" | "good" | "best"
 
 export type Route = {
     name: string;

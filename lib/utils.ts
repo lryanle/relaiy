@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { ChatMessage, ChatMessageList, ChatTab, ChatTabList } from "@/types/chat"
 import { Channel } from "@/types/types"
+import { ChatThread, StockfishResponse } from "@prisma/client"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -40,6 +41,20 @@ export const getChat = async (id: string): Promise<{messages: ChatMessage[]}> =>
     }
     
     return data
+}
+
+// get data points for a chat
+export const getOldDataPoints = async (id: string, idx: number): Promise<{stockfishResponse: StockfishResponse[], chatThread: ChatTab}> => {
+  // post to the getDataPoints endpoint
+  const response = await fetch(`/api/getDataPoints`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({chatId: id, index: idx})
+  })
+  const data = await response.json()
+  return data
 }
 
 // Create a new chat
@@ -129,11 +144,11 @@ export function formatRelativeTime(date: Date): string {
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
   
   if (diffInSeconds < 60) return 'just now';
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
-  if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} months ago`;
-  return `${Math.floor(diffInSeconds / 31536000)} years ago`;
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}hr ago`;
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
+  return `${Math.floor(diffInSeconds / 31536000)}yr ago`;
 }
 
 export function isValidPhonenumber(phoneNumber: string): boolean {
@@ -160,4 +175,30 @@ export function isValidDestination(destination: string, type: Channel): boolean 
     return isValidEmail(destination);
   }
   return false;
+}
+
+export function getProviderIconFromModel(model: string) {
+  if (model.includes("openai") || model.includes("gpt") || model.includes("4o") || model.includes("3o") || model.includes("o1")) {
+    return "/llmproviders/openai.svg"
+  } else if (model.includes("anthropic") || model.includes("claude")) {
+    return "/llmproviders/anthropic.svg"
+  } else if (model.includes("groq")) {
+    return "/llmproviders/groq.svg"
+  } else if (model.includes("gemini") || model.includes("google")) {
+    return "/llmproviders/google.svg"
+  } else if (model.includes("aws") || model.includes("amazon") || model.includes("bedrock")) {
+    return "/llmproviders/aws.svg"
+  } else if (model.includes("deepseek")) {
+    return "/llmproviders/deepseek.svg"
+  } else if (model.includes("llama") || model.includes("meta")) {
+    return "/llmproviders/meta.svg"
+  } else if (model.includes("mistral")) {
+    return "/llmproviders/mistral.svg"
+  } else if (model.includes("cohere")) {
+    return "/llmproviders/cohere.svg"
+  } else if (model.includes("perplexity")) {
+    return "/llmproviders/perplexity.svg"
+  } else  {
+    return "/llmproviders/openai.svg"
+  }
 }

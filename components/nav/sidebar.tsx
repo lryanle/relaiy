@@ -23,14 +23,14 @@ const activeCagents: CAgent[] = [
     recentActivity: new Date(),
   },
   {
-    status: "Active",
+    status: "Inactive",
     type: "SMS",
     receipientId: "4057194190",
     id: "2",
     recentActivity: new Date(Date.now() - 1000 * 60 * 2),
   },
   {
-    status: "Active",
+    status: "Complete",
     type: "Voice",
     receipientId: "4057194190",
     id: "3",
@@ -144,20 +144,19 @@ export default function Sidebar() {
                 </div>
                 <div className="space-y-1">
                   {activeCagents.map((cagent) => (
-                    <Button
+                    <Link
                       key={cagent.id + cagent.type + cagent.status + cagent.receipientId + cagent.recentActivity}
-                      onClick={handleNavigation}
-                      variant="ghost"
-                      className="gap-4 w-full flex justify-start items-center px-3 py-2 text-sm rounded-md transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
+                      href={`/?id=${cagent.id}`}
+                      className="gap-4 w-full flex justify-start items-center px-3 py-1 text-sm rounded-md transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
                     >
-                      <Status status="Active" />
+                      <Status status={cagent.status} />
                       <div className="flex flex-col items-start">
                         <div className="flex items-center gap-2">
                           {formatReceipientId(cagent.receipientId, cagent.type)}
                         </div>
                         <span className="text-xs text-gray-500 dark:text-gray-400">{`${cagent.type.toUpperCase()} • active ${formatTimeAgo(cagent.recentActivity)}`}</span>
                       </div>
-                    </Button>
+                    </Link>
                   ))}
                 </div>
               </div>

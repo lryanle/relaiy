@@ -185,8 +185,6 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
         // Calculate scores and status for all responses
         if (responses.length > 0) {
             const bestResponse = selectBestResponse(responses);
-
-            console.log(bestResponse);
             
             // Require at least 2 responses for completion voting
             const completionVotes = responses.filter(r => r.isComplete).length;
@@ -218,27 +216,33 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
                         }
                     ]
                 }),
+                
                 db.chatThread.update({
                     where: { id: parsedMessage.data.chatId },
                     data: { status: isComplete ? 'COMPLETED' : 'ACTIVE' }
+                }),
+                
+                // Add StockfishResponse transactions
+                db.stockfishResponse.create({
+                    data: {
+                        response: bestResponse.bestResponse.response,
+                        isBest: true,
+                        modelName: bestResponse.bestResponse.model,
+                        responseId: bestResponse.bestResponse.responseId,
+                        threadId: parsedMessage.data.chatId
+                    }
+                }),
+                
+                // Save all other responses
+                db.stockfishResponse.createMany({
+                    data: bestResponse.allResponses.map(response => ({
+                        response: response.response,
+                        isBest: false,
+                        modelName: response.model,
+                        responseId: response.responseId,
+                        threadId: parsedMessage.data.chatId
+                    }))
                 })
-            ]);
-
-            console.log([
-                {
-                    threadId: parsedMessage.data.chatId,
-                    content: parsedMessage.data.message,
-                    sender: 'USER'
-                },
-                {
-                    threadId: parsedMessage.data.chatId,
-                    content: bestResponse,
-                    sender: 'ASSISTANT',
-                    inputTokenUsage: totalInputTokens,
-                    outputTokenUsage: totalOutputTokens,
-                    cost: totalCost,
-                    modelName: Object.keys(modelUsage).join(',') // Store all models used
-                }
             ]);
 
             // Send response to Retell if it's a Retell message

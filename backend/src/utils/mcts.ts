@@ -132,6 +132,7 @@ interface SelectBestResponseResult {
         score: number;
         model: string;
         responseId: string;
+        status: 'best';
     };
     allResponses: {
         response: string;
@@ -143,8 +144,8 @@ interface SelectBestResponseResult {
 }
 
 export function selectBestResponse(responses: ResponseFormat[]): SelectBestResponseResult {
-    if (responses.length === 0) return { bestResponse: { response: '', score: 0, model: '', responseId: responses[0].responseId }, allResponses: [] };
-    if (responses.length === 1) return { bestResponse: { response: responses[0].response, score: 1, model: responses[0].modelName || '', responseId: responses[0].responseId }, allResponses: [{ response: responses[0].response, ratio: 1, status: 'best', model: responses[0].modelName || '', responseId: responses[0].responseId }] };
+    if (responses.length === 0) return { bestResponse: { response: '', score: 0, model: '', responseId: responses[0].responseId, status: 'best' }, allResponses: [] };
+    if (responses.length === 1) return { bestResponse: { response: responses[0].response, score: 1, model: responses[0].modelName || '', responseId: responses[0].responseId, status: 'best' }, allResponses: [{ response: responses[0].response, ratio: 1, status: 'best', model: responses[0].modelName || '', responseId: responses[0].responseId }] };
     
     console.log('best response', responses);
     // Create root node
@@ -195,7 +196,8 @@ export function selectBestResponse(responses: ResponseFormat[]): SelectBestRespo
             response: bestChild.response, 
             score: bestChild.score, 
             model: bestChild.modelName,
-            responseId: bestChild.responseId
+            responseId: bestChild.responseId,
+            status: 'best'
         },
         allResponses: scoredResponses
     };

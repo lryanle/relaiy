@@ -20,6 +20,7 @@ model ChatThread {
   requirements String[]
   tones        String[]
   messages     ChatMessage[]
+  stockfishResponses StockfishResponse[]
 }
 
 model ChatMessage {
@@ -36,6 +37,16 @@ model ChatMessage {
   updatedAt DateTime     @updatedAt @default(now())
 }
 
+model StockfishResponse {
+  id String @id @default(cuid())
+  response String
+  createdAt DateTime @default(now())
+  isBest Boolean @default(false)
+  modelName String?
+  responseId String?
+  threadId String?
+  thread ChatThread? @relation(fields: [threadId], references: [id])
+}
 
 model account {
   id                    String    @id @default(uuid())

@@ -109,7 +109,7 @@ export function InspectAgent({ selectedConvo, states, title = "Conversation Eval
             <div key={index} className="flex items-start justify-start gap-2">
               <span className={cn(
                 "px-5 text-sm font-medium rounded-md p-1",
-                state.score >= threshold 
+                state.score >= threshold && state.score > 0
                   ? "bg-blue-500 text-white" 
                   : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               )}>
@@ -230,14 +230,14 @@ export function InspectAgent({ selectedConvo, states, title = "Conversation Eval
                       </Avatar>
                       <Badge variant="outline" className={cn(
                         "text-sm px-1 py-0.5 leading-none font-medium rounded-sm",
-                        state.score >= threshold 
+                        state.score >= threshold && state.score > 0
                           ? "bg-blue-500 text-white border-blue-800" 
                           : "text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800"
                       )}>
                         {state.score.toFixed(2)}
                       </Badge>
                     </span>
-                    <span className="flex flex-col justify-center items-start gap-0.5 max-w-[200px]">
+                    <span className="flex flex-col justify-center items-start gap-0.5 max-w-[300px]">
                       <span className="flex flex-row justify-center items-center gap-2">
                         <span className="text-sm font-medium">
                           {state.modelType}

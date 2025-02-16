@@ -38,6 +38,9 @@ importers:
       express-rate-limit:
         specifier: ^7.5.0
         version: 7.5.0(express@4.21.2)
+      express-ws:
+        specifier: ^5.0.2
+        version: 5.0.2(express@4.21.2)
       morgan:
         specifier: ^1.10.0
         version: 1.10.0
@@ -69,6 +72,9 @@ importers:
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.0
+      '@types/express-ws':
+        specifier: ^3.0.5
+        version: 3.0.5
       '@types/morgan':
         specifier: ^1.9.9
         version: 1.9.9
@@ -548,6 +554,9 @@ packages:
 
   '@types/express-serve-static-core@5.0.1':
     resolution: {integrity: sha512-CRICJIl0N5cXDONAdlTv5ShATZ4HEwk6kDDIW2/w9qOWKg+NU/5F8wYRWCrONad0/UKkloNSmmyN/wX4rtpbVA==}
+
+  '@types/express-ws@3.0.5':
+    resolution: {integrity: sha512-lbWMjoHrm/v85j81UCmb/GNZFO3genxRYBW1Ob7rjRI+zxUBR+4tcFuOpKKsYQ1LYTYiy3356epLeYi/5zxUwA==}
 
   '@types/express@5.0.0':
     resolution: {integrity: sha512-DvZriSMehGHL1ZNLzi6MidnsDhUZM/x2pRdDIKdwbUNqqwHxMlRdkxtn6/EPKyqKpHqTl/4nRZsRNLpZxZRpPQ==}
@@ -1177,6 +1186,12 @@ packages:
     engines: {node: '>= 16'}
     peerDependencies:
       express: ^4.11 || 5 || ^5.0.0-beta.1
+
+  express-ws@5.0.2:
+    resolution: {integrity: sha512-0uvmuk61O9HXgLhGl3QhNSEtRsQevtmbL94/eILaliEADZBHZOQUAiHFrGPrgsjikohyrmSG5g+sCfASTt0lkQ==}
+    engines: {node: '>=4.5.0'}
+    peerDependencies:
+      express: ^4.0.0 || ^5.0.0-alpha.1
 
   express@4.21.2:
     resolution: {integrity: sha512-28HqgMZAmih1Czt9ny7qr6ek2qddF4FclbMzwhCREB6OFfH+rXAnuNCwo1/wFvrtbgsQDb4kSbX9de9lFbrXnA==}
@@ -2371,6 +2386,18 @@ packages:
     resolution: {integrity: sha512-7KxauUdBmSdWnmpaGFg+ppNjKF8uNLry8LyzjauQDOVONfFLNKrKvQOxZ/VuTIcS/gge/YNahf5RIIQWTSarlg==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
 
+  ws@7.5.10:
+    resolution: {integrity: sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==}
+    engines: {node: '>=8.3.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: ^5.0.2
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   ws@8.18.0:
     resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
     engines: {node: '>=10.0.0'}
@@ -3019,6 +3046,12 @@ snapshots:
       '@types/qs': 6.9.16
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
+
+  '@types/express-ws@3.0.5':
+    dependencies:
+      '@types/express': 5.0.0
+      '@types/express-serve-static-core': 5.0.1
+      '@types/ws': 8.5.14
 
   '@types/express@5.0.0':
     dependencies:
@@ -3719,6 +3752,14 @@ snapshots:
   express-rate-limit@7.5.0(express@4.21.2):
     dependencies:
       express: 4.21.2
+
+  express-ws@5.0.2(express@4.21.2):
+    dependencies:
+      express: 4.21.2
+      ws: 7.5.10
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   express@4.21.2:
     dependencies:
@@ -5070,6 +5111,8 @@ snapshots:
     dependencies:
       imurmurhash: 0.1.4
       signal-exit: 3.0.7
+
+  ws@7.5.10: {}
 
   ws@8.18.0: {}
 

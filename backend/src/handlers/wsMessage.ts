@@ -229,7 +229,8 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
                         isBest: true,
                         modelName: bestResponse.bestResponse.model,
                         responseId: bestResponse.bestResponse.responseId,
-                        threadId: parsedMessage.data.chatId
+                        threadId: parsedMessage.data.chatId,
+                        ratio: 1
                     }
                 }),
                 
@@ -240,7 +241,8 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
                         isBest: false,
                         modelName: response.model,
                         responseId: response.responseId,
-                        threadId: parsedMessage.data.chatId
+                        threadId: parsedMessage.data.chatId,
+                        ratio: response.ratio
                     }))
                 })
             ]);

@@ -42,10 +42,11 @@ model StockfishResponse {
   response String
   createdAt DateTime @default(now())
   isBest Boolean @default(false)
-  modelName String?
-  responseId String?
-  threadId String?
-  thread ChatThread? @relation(fields: [threadId], references: [id])
+  modelName String
+  responseId String
+  threadId String
+  thread ChatThread @relation(fields: [threadId], references: [id])
+  ratio Float
 }
 
 model account {

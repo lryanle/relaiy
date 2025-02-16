@@ -63,6 +63,15 @@ export const models = {
     //     }
     // }),
 
+    aion_labs_1_mini: createModel({
+        provider: 'openrouter',
+        modelName: 'aion-labs/aion-1.0-mini',
+        apiKey: process.env.OPENROUTER_API_KEY!,
+        price: {
+            input: 0.7,
+            output: 1.4
+        }
+    }),
     gpt4oMini: createModel({
         provider: 'openrouter',
         modelName: 'openai/gpt-4o-mini',

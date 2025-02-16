@@ -3,9 +3,8 @@ import { useState } from "react"
 import { cn, getOldDataPoints } from "@/lib/utils"
 import { ChatMessage } from "@/types/chat"
 import { Conversation } from "@/types/types"
-import { DataPoint } from "@/types/websocket"
 import { useEffect, useRef } from "react"
-import { InspectAgent } from "../agent/inspectagent"
+import { ConversationState, InspectAgent } from "../agent/inspectagent"
 
 interface ChatBodyProps {
     chatId: string
@@ -37,13 +36,29 @@ export default function ChatBody({ chatId, messages }: ChatBodyProps) {
 
     const [selectedMessage, setSelectedMessage] = useState<ChatMessage | null>(null)
     const [selectedConvo, setSelectedConvo] = useState<Conversation | null>(null)
-    const [dataPoints, setDataPoints] = useState<DataPoint[]>([])
+    const [dataPoints, setDataPoints] = useState<ConversationState[]>([])
+
+    function getStatusFromScore(score: number, maxScore: number, minScore: number) {
+        if (score === maxScore) {
+            return "best"
+        } else if (score > 0.75) {
+            return "good"
+        } else if (score > 0.65) {
+            return "okay"
+        } else {
+            return "bad"
+        }
+    }
 
     async function _getOldDataPoints() {
-        const data = await getOldDataPoints(chatId, messages.length - 1)  
-        // setSelectedConvo(data.chatThread)
+        const data = await getOldDataPoints(chatId, 0)
+        setSelectedConvo(data.chat)
+
+        const maxScore = Math.max(...data.stockfishResponse.map(state => state.ratio))
+        const minScore = Math.min(...data.stockfishResponse.map(state => state.ratio))
+
         setDataPoints(data.stockfishResponse.map(state => ({
-            status: "best",
+            status: getStatusFromScore(state.ratio, maxScore, minScore),
             modelType: state.modelName ?? "",
             messages: [
                 {
@@ -51,16 +66,20 @@ export default function ChatBody({ chatId, messages }: ChatBodyProps) {
                     content: state.response
                 }
             ],
-            score: 0 // TODO: Add relay score
+            score: state.ratio
         })))
+
+        console.log(data.stockfishResponse)
     }
 
     useEffect(() => {
-        _getOldDataPoints()
-    }, [chatId, messages])
+        if (selectedMessage) {
+            _getOldDataPoints()
+        }
+    }, [selectedMessage])
 
     return (
-        <div className="relative flex flex-row justify-center items-center">
+        <div className="relative flex flex-row justify-center items-center h-full w-full">
 
             <div className="absolute top-0 left-0 w-full pointer-events-none gap-2 p-5 z-10 flex flex-row items-center justify-center">
                 {isWaitingForResponse() ? (<div className="flex flex-row items-center justify-center gap-2 bg-muted rounded-full py-3 px-8 animate-fade-up-scale-in duration-300">
@@ -70,18 +89,20 @@ export default function ChatBody({ chatId, messages }: ChatBodyProps) {
                 </div>)}
             </div>
 
-            <div className="flex flex-col gap-4 p-6 h-full overflow-y-auto relative" ref={messagesEndRef}>
+            <div className="flex flex-grow flex-col gap-4 p-6 h-full overflow-y-auto relative" ref={messagesEndRef}>
                 {messages.map((message, i) => (
                     <div
                         onClick={() => {
 
-                            if (selectedMessage === message) {
+                            if (selectedMessage === message || i === 0) {
                                 setSelectedMessage(null)
                                 return
                             }
 
                             if (message.role === "assistant") {
                                 setSelectedMessage(message)
+                                setSelectedConvo(null)
+                                setDataPoints([])
                             }
                         }}
                         key={i}
@@ -102,10 +123,12 @@ export default function ChatBody({ chatId, messages }: ChatBodyProps) {
             </div>
 
             {selectedMessage && selectedConvo && (
-            <InspectAgent
-                    selectedConvo={selectedConvo}
-                    states={[]}
-                />
+                <div className="pt-2 pr-4 animate-slide-left-in duration-600 overflow-x-visible">
+                    <InspectAgent
+                        selectedConvo={selectedConvo}
+                        states={dataPoints}
+                    />
+                </div>
             )}
         </div>
     )

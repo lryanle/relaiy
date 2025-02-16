@@ -83,7 +83,7 @@ export default function Home() {
           content: state.response
         }
       ],
-      score: 0 // TODO: Add relay score
+      score: state.ratio
     }))) 
 
   }

@@ -42,7 +42,7 @@ export default function Navigation({ children }: Readonly<Navigationprops>) {
         <header className="h-16 border-gray-200 dark:border-[#1F1F23]">
           <Navbar />
         </header>
-          <main className="flex-1 overflow-auto bg-white dark:bg-[#0F0F12] font-[family-name:var(--font-lexend)]">
+          <main className="flex-1 overflow-auto h-full w-full bg-white dark:bg-[#0F0F12] font-[family-name:var(--font-lexend)]">
             {children}
           </main>
       </div>

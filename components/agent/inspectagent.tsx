@@ -1,13 +1,13 @@
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn, formatReceipientId, getProviderIconFromModel } from "@/lib/utils";
 import { Conversation, StateStatus } from "@/types/types";
 import { X } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 
 interface Message {
   role: string;
@@ -19,7 +19,7 @@ interface AnalysisResult {
   label: string;
 }
 
-interface ConversationState {
+export interface ConversationState {
   modelType: string;
   status: StateStatus;
   messages: Message[];

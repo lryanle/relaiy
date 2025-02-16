@@ -1,10 +1,13 @@
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { cn, formatReceipientId } from "@/lib/utils";
+import { cn, formatReceipientId, getProviderIconFromModel } from "@/lib/utils";
 import { Conversation, StateStatus } from "@/types/types";
 import { X } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 interface Message {
   role: string;
@@ -87,11 +90,16 @@ export function InspectAgent({ selectedConvo, states, title = "Conversation Eval
     }
   };
 
+  const threshold = useMemo(() => {
+    if (!states.length) return 0;
+    const topStates = [...states].sort((a, b) => b.score - a.score);
+    return topStates[Math.floor(topStates.length * 0.3)]?.score ?? 0;
+  }, [states]);
+
   const analysisSection = useMemo(() => {
     if (!states.length) return null;
     
     const topStates = [...states].sort((a, b) => b.score - a.score);
-    const threshold = topStates[Math.floor(topStates.length * 0.3)]?.score;
     
     return (
       <div className="space-y-2">
@@ -159,14 +167,39 @@ export function InspectAgent({ selectedConvo, states, title = "Conversation Eval
         <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">CONVERSATION STATE SPACE</h3>
         <div className="flex flex-row flex-wrap gap-1 w-full max-w-full">
           {states.map((state, index) => (
-            <div
-              key={index}
-              className={cn(
-                "w-4 h-4 rounded-full transition-colors",
-                getStateColor(state.status)
-              )}
-              title={`Model: ${state.modelType}, Score: ${state.score.toFixed(2)}`}
-            />
+            <TooltipProvider key={index + "tooltip" + state.modelType + state.status + state.score}>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <div
+                    className={cn(
+                      "w-4 h-4 rounded-full transition-colors",
+                      getStateColor(state.status)
+                    )}
+                    title={`Model: ${state.modelType}, Score: ${state.score.toFixed(2)}`}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                <div className="flex justify-center items-start gap-2">
+                    <Avatar className="bg-gray-100 dark:bg-gray-600 rounded-sm">
+                      <AvatarImage src={getProviderIconFromModel(state.modelType)} alt={state.modelType} />
+                    </Avatar>
+                    <span className="flex flex-col justify-center items-start gap-0.5 max-w-[200px]">
+                      <span className="flex flex-row justify-center items-center gap-2">
+                        <Badge variant="outline" className={`text-sm px-1 py-0.5 leading-none font-medium rounded-sm ${state.status === "pending" ? "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" : "bg-blue-500 text-white border-blue-800 dark:bg-blue-800"}`}>
+                          {state.status === "pending" ? "Unexplored" : "Explored"}
+                        </Badge>
+                        <span className="text-sm font-medium">
+                          {state.modelType}
+                        </span>
+                      </span>
+                      <span className="text-sm font-medium dark:text-gray-700 text-gray-300">
+                        {state.messages[state.messages.length - 1].content}
+                      </span>
+                    </span>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ))}
         </div>
       </div>
@@ -178,14 +211,46 @@ export function InspectAgent({ selectedConvo, states, title = "Conversation Eval
         </h3>
         <div className="flex flex-row flex-wrap gap-1 w-full max-w-full">
           {states.map((state, index) => (
-            <div
-              key={index}
-              className={cn(
-                "w-4 h-4 rounded-full transition-colors",
-                getMCColor(state.status)
-              )}
-              title={`Model: ${state.modelType}, Score: ${state.score.toFixed(2)}`}
-            />
+            <TooltipProvider key={index + "tooltip" + state.modelType + state.status + state.score}>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <div
+                    className={cn(
+                      "w-4 h-4 rounded-full transition-colors",
+                      getMCColor(state.status)
+                    )}
+                    title={`Model: ${state.modelType}, Score: ${state.score.toFixed(2)}`}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                <div className="flex justify-center items-start gap-2">
+                    <span className="flex flex-col justify-center items-center gap-1">
+                      <Avatar className="bg-gray-100 dark:bg-gray-600 rounded-sm">
+                        <AvatarImage src={getProviderIconFromModel(state.modelType)} alt={state.modelType} />
+                      </Avatar>
+                      <Badge variant="outline" className={cn(
+                        "text-sm px-1 py-0.5 leading-none font-medium rounded-sm",
+                        state.score >= threshold 
+                          ? "bg-blue-500 text-white border-blue-800" 
+                          : "text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800"
+                      )}>
+                        {state.score.toFixed(2)}
+                      </Badge>
+                    </span>
+                    <span className="flex flex-col justify-center items-start gap-0.5 max-w-[200px]">
+                      <span className="flex flex-row justify-center items-center gap-2">
+                        <span className="text-sm font-medium">
+                          {state.modelType}
+                        </span>
+                      </span>
+                      <span className="text-sm font-medium dark:text-gray-700 text-gray-300">
+                        {state.messages[state.messages.length - 1].content}
+                      </span>
+                    </span>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ))}
         </div>
       </div>

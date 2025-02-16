@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
 
         // use prisma to get StockfishResponse response at the exact timestamp
-        const stockfishResponse = await prisma.stockfishResponse.findFirst({
+        const stockfishResponse = await prisma.stockfishResponse.findMany({
           where: {
             threadId: chatId,
             createdAt: {
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         console.log(stockfishResponse)
         
     
-        return NextResponse.json({ });
+        return NextResponse.json({ stockfishResponse, chatThread });
       } catch (error) {
         console.error('Error fetching chat:', error);
         return NextResponse.json(

@@ -3,9 +3,10 @@
 import ChatBody from "@/components/chat/chat-body"
 import { getChat } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
+import { use } from "react"
 
-export default function Chat({ params }: { params: { slug: string } }) {
-  const { slug } = params
+export default function Chat({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params)
 
   const { data: messages, isLoading } = useQuery({
     queryKey: ["chat", slug],

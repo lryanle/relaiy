@@ -2,14 +2,14 @@
 
 import { SignInModal } from "@/components/auth/sign-in-modal"
 import { SignUpModal } from "@/components/auth/sign-up-modal"
+import { NewChatModal } from "@/components/chat/new-chat-modal"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/lib/context/auth-provider"
-import { createNewChat } from "@/lib/utils"
-import { Bell, ChevronRight, Plus, User } from "lucide-react"
+import { Bell, ChevronRight, User } from "lucide-react"
 import Link from "next/link"
-import { Button } from "../ui/button"
+import { useRouter } from "next/navigation"
 
 interface BreadcrumbItem {
   label: string
@@ -17,6 +17,9 @@ interface BreadcrumbItem {
 }
 
 export default function Navbar() {
+
+  const router = useRouter();
+
   const breadcrumbs: BreadcrumbItem[] = [
     { label: "relaiy", href: "#" },
     { label: "dashboard", href: "#" },
@@ -54,36 +57,34 @@ export default function Navbar() {
 
         <ThemeToggle />
 
-        {user ? (<>
-        <Button variant="outline" onClick={createNewChat}>
-          <Plus className="h-4 w-4" />
-          New C-Agent
-        </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger className="focus:outline-none">
-              <Avatar>
-                <AvatarImage src={user.image ?? undefined} />
-                <AvatarFallback>
-                  <User className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              sideOffset={8}
-              className="w-[280px] sm:w-80 bg-background border-border rounded-lg shadow-lg"
-            >
-              <DropdownMenuItem>
-                <div className="flex flex-col space-y-1">
-                  <p className="font-medium">{user.name}</p>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => signOut()}>
-                Sign Out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        {user ? (
+          <>
+            <NewChatModal />
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus:outline-none">
+                <Avatar>
+                  <AvatarImage src={user.image ?? undefined} />
+                  <AvatarFallback>
+                    <User className="h-4 w-4" />
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                sideOffset={8}
+                className="w-[280px] sm:w-80 bg-background border-border rounded-lg shadow-lg"
+              >
+                <DropdownMenuItem>
+                  <div className="flex flex-col space-y-1">
+                    <p className="font-medium">{user.name}</p>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => signOut()}>
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </>
         ) : (
           <div className="flex items-center gap-2">

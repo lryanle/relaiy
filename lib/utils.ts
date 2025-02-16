@@ -43,20 +43,20 @@ export const getChat = async (id: string): Promise<{messages: ChatMessage[]}> =>
 }
 
 // Create a new chat
-export const createNewChat = async (): Promise<ChatTabList> => {
+export const createNewChat = async (data: {
+  goal: string
+  firstMessage: string
+  destination: string
+  type: string
+  tones: string[]
+  requirements: string[]
+}): Promise<ChatTabList> => {
     const response = await fetch("/api/createChat", {
         method: "POST",
-        body: JSON.stringify({
-            goal: "You are trying to get a date or hanging out for the user.",
-            firstMessage: "yo yo yo",
-            destination: "+14695963483",
-            type: "SMS",
-            tones: ["angry"],
-            requirements: ["Keep it short and concise"]
-        })
+        body: JSON.stringify(data)
     })
-    const data = await response.json()
-    return data.chats
+    const responseData = await response.json()
+    return responseData.chats
 }
 
 // Get total cost

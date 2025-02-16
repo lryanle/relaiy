@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { ChatMessage, ChatMessageList, ChatTabList } from "@/types/chat"
+import { ChatMessage, ChatMessageList, ChatTab, ChatTabList } from "@/types/chat"
 import { Channel } from "@/types/types"
 
 export function cn(...inputs: ClassValue[]) {

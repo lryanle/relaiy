@@ -55,7 +55,7 @@ export function NewChatModal() {
     try {
       const chats = await createNewChat(formData)
       if (chats) {
-        router.push(`/chat/${chats[0].id}`)
+        router.push(`/chat/${chats.id}`)
         setOpen(false)
       }
     } catch (error) {

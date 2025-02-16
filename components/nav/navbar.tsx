@@ -11,6 +11,8 @@ import { Bell, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "../ui/breadcrumb"
+import { Button } from "../ui/button"
+import { useToast } from "@/hooks/use-toast"
 
 interface BreadcrumbItem {
   label: string
@@ -54,6 +56,7 @@ export default function Navbar() {
 
   const breadcrumbs = getBreadcrumbs()
   const { user, signOut } = useAuth();
+  const { toast } = useToast()
 
   return (
     <nav className="px-3 sm:px-6 flex items-center justify-between bg-white dark:bg-[#0F0F12] border-b border-gray-200 dark:border-[#1F1F23] h-full">
@@ -78,12 +81,19 @@ export default function Navbar() {
 
       <div className="flex items-center gap-2 sm:gap-4 ml-auto sm:ml-0">
         {user && <NewChatModal />}
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          onClick={() => {
+            toast({
+              title: "Notifications",
+              description: "Check the left sidebar :)",
+            })
+          }}
           className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-[#1F1F23] rounded-full transition-colors"
         >
           <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
-        </button>
+        </Button>
 
         <ThemeToggle />
 

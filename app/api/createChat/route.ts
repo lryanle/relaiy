@@ -3,6 +3,14 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
+type CreateChatPayload = {
+    userId: string
+    goal: string
+    firstMessage: string
+    address: string
+    type: string
+}
+
 export async function POST(request: Request) {
     const session = await auth.api.getSession({
         headers: request.headers
@@ -14,11 +22,14 @@ export async function POST(request: Request) {
 
     console.log(session)    
 
-    const body = await request.json()
-    const { userId } = body
+    const body = await request.json() as CreateChatPayload
+    const { userId, goal, firstMessage, address, type } = body
 
-    if (!userId) {
-        return NextResponse.json({ error: "User ID is required" }, { status: 400 })
+    if (!userId || !goal || !firstMessage || !address || !type) {
+        return NextResponse.json({ 
+            error: "Missing required fields", 
+            required: ["userId", "goal", "firstMessage", "address", "type"]
+        }, { status: 400 })
     }
 
     // post /api/create-chat
@@ -27,13 +38,22 @@ export async function POST(request: Request) {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ userId })
+        body: JSON.stringify({
+            userId,
+            goal,
+            firstMessage,
+            address,
+            type
+        })
     })
 
     console.log(response)
 
     if (!response.ok) {
-        return NextResponse.json({ error: "Failed to create chat" }, { status: 500 })
+        return NextResponse.json({ 
+            error: "Failed to create chat",
+            details: await response.text()
+        }, { status: 500 })
     }
 
     const data = await response.json()

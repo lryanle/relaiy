@@ -1,14 +1,9 @@
 "use client"
 
 import { toast } from "@/hooks/use-toast"
+import { useAuth } from "@/lib/context/auth-provider"
+import { WebSocketContextType } from "@/types/websocket"
 import { createContext, useContext, useEffect, useRef, useState } from "react"
-
-type WebSocketContextType = {
-    socket: WebSocket | null
-    isConnected: boolean
-    sendMessage: (message: any) => void
-    lastMessage: any | null
-}
 
 const WebSocketContext = createContext<WebSocketContextType>({
     socket: null,
@@ -28,9 +23,16 @@ export function WebSocketProvider({
     const [lastMessage, setLastMessage] = useState<any | null>(null)
     const socketRef = useRef<WebSocket | null>(null)
 
+    const { user } = useAuth()
+
     useEffect(() => {
+
+        if (!user?.id) {
+            return
+        }
+
         // Create WebSocket connection
-        const socket = new WebSocket(url)
+        const socket = new WebSocket(url + "?" + user?.id)
         socketRef.current = socket
 
         // Connection opened
@@ -40,12 +42,22 @@ export function WebSocketProvider({
                 title: "Connected",
                 description: "WebSocket connection established",
             })
+
+            // send initial message
+            // sendMessage({
+            //     type: "initial",
+            //     message: user?.id
+            // })
         })
 
         // Listen for messages
         socket.addEventListener('message', (event) => {
             const message = JSON.parse(event.data)
-            setLastMessage(message)
+            toast({
+                title: "Message",
+                description: JSON.stringify(message),
+            })
+            // setLastMessage(message)
         })
 
         // Connection closed
@@ -73,7 +85,7 @@ export function WebSocketProvider({
                 socket.close()
             }
         }
-    }, [url])
+    }, [user?.id])
 
     const sendMessage = (message: any) => {
         if (socketRef.current?.readyState === WebSocket.OPEN) {

@@ -26,7 +26,7 @@ export default function RootLayout({
         disableTransitionOnChange
       >
         <AuthProvider>
-          <WebSocketProvider url="wss://your-websocket-url">
+          <WebSocketProvider url="ws://ws.relaiy.tech">
             <body className="antialiased">
               <Navigation>{children}</Navigation>
             </body>

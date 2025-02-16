@@ -204,8 +204,8 @@ export function WebSocketProvider({
         socket.addEventListener('open', () => {
             setIsConnected(true)
             toast({
-                title: "Connected",
-                description: "WebSocket connection established",
+                title: "Relaiy Connected",
+                description: "Connection established",
             })
         })
 
@@ -213,8 +213,8 @@ export function WebSocketProvider({
             setIsConnected(false)
             setIsLive(false)
             toast({
-                title: "Disconnected",
-                description: "WebSocket connection closed",
+                title: "Relaiy Disconnected",
+                description: "Connection closed",
                 variant: "destructive"
             })
         })
@@ -222,8 +222,8 @@ export function WebSocketProvider({
         socket.addEventListener('error', () => {
             setIsLive(false)
             toast({
-                title: "Error",
-                description: "WebSocket connection error",
+                title: "Relaiy Error",
+                description: "Connection error",
                 variant: "destructive"
             })
         })
@@ -252,8 +252,8 @@ export function WebSocketProvider({
             socketRef.current.send(JSON.stringify(message))
         } else {
             toast({
-                title: "Error",
-                description: "WebSocket is not connected",
+                title: "Relaiy Error",
+                description: "Connection was not established",
                 variant: "destructive"
             })
         }

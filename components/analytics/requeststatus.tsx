@@ -16,7 +16,7 @@ export default function RequestStatus({ data }: RequestStatusProps) {
       config={{
         count: {
           label: "Requests",
-          color: "hsl(var(--chart-1))",
+          color: "hsl(var(--chart-2))",
         },
       }}
       className="h-[300px] w-full"
@@ -28,7 +28,7 @@ export default function RequestStatus({ data }: RequestStatusProps) {
         <ChartTooltip content={<ChartTooltipContent />} />
         <Bar 
           dataKey="count" 
-          fill="var(--color-requests)" 
+          fill="hsl(var(--chart-2))" 
           radius={[4, 4, 0, 0]}
         />
       </BarChart>

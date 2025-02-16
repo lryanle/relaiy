@@ -53,7 +53,7 @@ const columns: ColumnDef<Transaction>[] = [
     header: "Model",
     cell: ({ row }) => (
       <div className="py-2 px-2 flex items-center justify-start gap-1">
-        <Avatar className="h-6 w-6">
+        <Avatar className="h-6 w-6 bg-gray-100">
           <AvatarImage src={getProviderIconFromModel(row.getValue("model"))} />
           <AvatarFallback>
             {row.getValue("model")}

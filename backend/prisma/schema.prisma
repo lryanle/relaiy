@@ -9,49 +9,49 @@ datasource db {
 }
 
 model ChatThread {
-  id           String        @id @default(uuid())
-  createdAt    DateTime      @default(now())
-  status       ThreadStatus  @default(ACTIVE)
-  channels     ChannelType   @default(SMS)
-  goal         String
-  userId       String
-  destination  String
-  type         ChannelType
-  requirements String[]
-  tones        String[]
-  messages     ChatMessage[]
+  id                 String              @id @default(uuid())
+  createdAt          DateTime            @default(now())
+  status             ThreadStatus        @default(ACTIVE)
+  channels           ChannelType         @default(SMS)
+  goal               String
+  userId             String
+  accountId          String
+  account            account             @relation(fields: [accountId], references: [accountId])
+  destination        String
+  type               ChannelType
+  messages           ChatMessage[]
   stockfishResponses StockfishResponse[]
 }
 
 model ChatMessage {
-  id        String       @id @default(cuid())
-  threadId  String
-  content   String
-  sender    Sender
-  thread    ChatThread   @relation(fields: [threadId], references: [id])
-  inputTokenUsage Int @default(0)
-  outputTokenUsage Int @default(0)
-  cost Float @default(0)
-  modelName String?
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt @default(now())
+  id               String     @id @default(cuid())
+  threadId         String
+  content          String
+  sender           Sender
+  thread           ChatThread @relation(fields: [threadId], references: [id])
+  inputTokenUsage  Int        @default(0)
+  outputTokenUsage Int        @default(0)
+  cost             Float      @default(0)
+  modelName        String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @default(now()) @updatedAt
 }
 
 model StockfishResponse {
-  id String @id @default(cuid())
-  response String
-  createdAt DateTime @default(now())
-  isBest Boolean @default(false)
-  modelName String
+  id         String     @id @default(cuid())
+  response   String
+  createdAt  DateTime   @default(now())
+  isBest     Boolean    @default(false)
+  modelName  String
   responseId String
-  threadId String
-  thread ChatThread @relation(fields: [threadId], references: [id])
-  ratio Float @default(-1)
+  threadId   String
+  thread     ChatThread @relation(fields: [threadId], references: [id])
+  ratio      Float      @default(-1)
 }
 
 model account {
   id                    String    @id @default(uuid())
-  accountId             String
+  accountId             String    @unique
   providerId            String
   userId                String
   accessToken           String?
@@ -64,6 +64,9 @@ model account {
   createdAt             DateTime
   updatedAt             DateTime
   user                  user      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requirements          String[]
+  tones                 String[]
+  chatThreads           ChatThread[]
 }
 
 model session {

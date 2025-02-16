@@ -14,7 +14,7 @@ const PromptSchema = z.object({
         location: z.string(),
         interests: z.array(z.string())
     }),
-    tone: z.string().optional().default('neutral'),
+    tone: z.array(z.string()).optional().default(['neutral']),
     requirements: z.array(z.string()).optional(),
 });
 
@@ -27,6 +27,7 @@ export interface ResponseFormat {
     reason?: string;
     modelName: string;
     responseId: string;
+    extraPoints?: number;
 }
 
 // Create prompt template
@@ -36,7 +37,7 @@ export const createPrompt = (params: PromptParams) => {
     1. Responses should feel spontaneous and authentic, like real human conversation
     2. Vary sentence structures (mix short/long, questions/statements)
     3. Use natural imperfections (e.g., occasional "um", "hmm" where appropriate)
-    4. Match this tone: ${params.tone})
+    4. Match this tone: ${params.tone.join(', ')}
     5. Keep language contemporary and colloquial
     6. For each response, evaluate if the conversation goal has been achieved
     7. The response must follow the stream of converstation and history of the chat.`;

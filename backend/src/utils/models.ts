@@ -73,19 +73,19 @@ export const models = {
         }
     }),
 
-    // sonar: createModel({
-    //     provider: 'openrouter',
-    //     modelName: 'perplexity/sonar',
-    //     apiKey: process.env.OPENROUTER_API_KEY!,
-    //     price: {
-    //         input: 1,
-    //         output: 1
-    //     }
-    // }),
+    amazon_nova_micro_1: createModel({
+        provider: 'openrouter',
+        modelName: 'amazon/nova-micro-v1',
+        apiKey: process.env.OPENROUTER_API_KEY!,
+        price: {
+            input: 0.035,
+            output: 0.14
+        }
+    }),
 
     claude_3_5_haiku: createModel({
         provider: 'openrouter',
-        modelName: 'anthropic/claude-3-5-haiku',
+        modelName: 'anthropic/claude-3-5-haiku:beta',
         apiKey: process.env.OPENROUTER_API_KEY!,
         price: {
             input: 0.5,
@@ -122,23 +122,13 @@ export const models = {
         }
     }),
 
-    // nvidia: createModel({
-    //     provider: 'openrouter',
-    //     modelName: 'nvidia/llama-3.1-nemotron-70b-instruct',
-    //     apiKey: process.env.OPENROUTER_API_KEY!,
-    //     price: {
-    //         input: 1,
-    //         output: 1
-    //     }
-    // }),
-
-    gemini_flash_thinking: createModel({
-        provider: 'gemini',
-        modelName: 'gemini-2.0-flash-thinking-exp-01-21',
-        apiKey: process.env.GEMINI_API_KEY!,
+    perplexity_sonar_small: createModel({
+        provider: 'openrouter',
+        modelName: 'perplexity/llama-3.1-sonar-small-128k-chat',
+        apiKey: process.env.OPENROUTER_API_KEY!,
         price: {
-            input: 0,
-            output: 0
+            input: 1,
+            output: 1
         }
     }),
 

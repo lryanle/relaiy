@@ -48,6 +48,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 ...session.user,
                 image: session.user.image ?? null
             });
+
+            // fetch the create chat
+            // fetch("/api/createChat", {
+            //     method: "POST",
+            //     body: JSON.stringify({ userId: session.user.id })
+            // })
         }
     }, [session]);
 

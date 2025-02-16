@@ -273,6 +273,8 @@ export const wsMessage = async (ws: WebSocket, message: string) => {
             }
 
             if (parsedMessage.data.destination) {
+                console.log('Sending message to', parsedMessage.data.destination);
+                console.log('Best response', bestResponse.bestResponse.response);
                 await twilioClient.messages.create({
                     body: bestResponse.bestResponse.response,
                     to: `whatsapp:${parsedMessage.data.destination}`,

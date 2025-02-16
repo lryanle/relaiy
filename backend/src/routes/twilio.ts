@@ -9,9 +9,9 @@ const twilioRouter = Router();
 twilioRouter.post('/',
     bodyParser.urlencoded({ extended: false }),
     async (req, res) => {
-        console.log('Received webhook:', req.body);
-
         const { From, Body } = req.body;
+
+        console.log(`Received message (${From})`, Body);
 
         const chat = await db.chatThread.findFirst({
             where: {

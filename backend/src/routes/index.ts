@@ -33,6 +33,7 @@ index.post('/create-chat', async (req, res) => {
                 userId,
                 destination,
                 type,
+                accountId: userId
             }
         });
 

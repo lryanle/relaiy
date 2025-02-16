@@ -86,7 +86,15 @@ index.get('/get-messages/:id', async (req, res) => {
     const messages = await prisma.chatMessage.findMany({
         where: { threadId: req.params.id }
     });
-    res.json(messages);
+
+    const stockfishResponses = await prisma.stockfishResponse.findMany({
+        where: { threadId: req.params.id }
+    });
+
+    res.json({
+        messages,
+        stockfishResponses
+    });
 });
 
 

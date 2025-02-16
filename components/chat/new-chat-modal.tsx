@@ -10,16 +10,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { createNewChat, isValidDestination } from "@/lib/utils"
-import { MessageSquare, Phone, Plus, Mail, Check, Dice6 } from "lucide-react"
+import { Channel } from "@/types/types"
+import { useQueryClient } from "@tanstack/react-query"
+import { Check, Dice6, Mail, MessageSquare, Phone, Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { FaDiscord } from "react-icons/fa"
-import { Channel } from "@/types/types"
 
 const randomGoals = [
   "Be as rude as possible.",
@@ -31,6 +32,7 @@ const randomGoals = [
 
 export function NewChatModal() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -52,9 +54,12 @@ export function NewChatModal() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    console.log(formData)
     try {
       const chats = await createNewChat(formData)
       if (chats) {
+        await queryClient.invalidateQueries({ queryKey: ["chats"] })
+        console.log(chats)  
         router.push(`/chat/${chats.id}`)
         setOpen(false)
       }
@@ -165,7 +170,7 @@ export function NewChatModal() {
                   <SelectGroup>
                     <SelectLabel>Channel</SelectLabel>
                     {channelTypes.map(({ value, icon: Icon, label }) => (
-                      <SelectItem key={value} value={value}>
+                      <SelectItem key={value} value={value} disabled={formData.type === "DISCORD" || formData.type === "EMAIL"}>
                         <div className="flex items-center gap-2">
                           <Icon className="h-4 w-4" />
                           {label}

@@ -18,6 +18,8 @@ export async function POST(request: Request) {
         headers: request.headers
     })
 
+    console.log(session)    
+
     if (!session) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }

@@ -2,6 +2,7 @@
 
 import { columns } from "@/components/table/columns"
 import { DataTable } from "@/components/table/data-table"
+import Spinner from "@/components/ui/spinner"
 import { getChatsForUser } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 import { Conversation, StateStatus } from "@/types/types"
@@ -672,7 +673,11 @@ export default function Home() {
   })) || []
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return (
+      <div className="flex items-center justify-center w-full h-full">
+        <Spinner />
+      </div>
+    )
   }
 
   return (

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
-import { ArrowRightIcon } from "lucide-react"
+import { ArrowRightIcon, TrashIcon } from "lucide-react"
 import Link from "next/link"
 
 const tones = [
@@ -54,6 +54,10 @@ export default function FineTuning() {
       setRequirements((prev) => [...prev, newRequirement.trim()])
       setNewRequirement("")
     }
+  }
+
+  const handleRemoveRequirement = (index: number) => {
+    setRequirements((prev) => prev.filter((_, i) => i !== index))
   }
 
   const handleSubmit = () => {
@@ -120,7 +124,19 @@ export default function FineTuning() {
             </div>
             <div className="flex flex-wrap gap-2">
               {requirements.map((req, index) => (
-                <Badge key={index} variant="outline" className="text-sm bg-gray-100 dark:bg-[#1F1F23] text-gray-900 dark:text-gray-100 dark:border-gray-200/20 border-[#1F1F23]/20">{req}</Badge>
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className="group relative cursor-pointer transition-all hover:pr-8 text-sm bg-gray-100 dark:bg-[#1F1F23] text-gray-900 dark:text-gray-100 dark:border-gray-200/20 border-[#1F1F23]/20"
+                >
+                  {req}
+                  <span
+                    onClick={() => handleRemoveRequirement(index)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <TrashIcon className="w-4 h-4 text-red-500" />
+                  </span>
+                </Badge>
               ))}
             </div>
           </div>

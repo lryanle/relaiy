@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { ChatMessage, ChatMessageList, ChatTab, ChatTabList } from "@/types/chat"
-import { Channel } from "@/types/types"
+import { Channel, Conversation } from "@/types/types"
 import { ChatThread, StockfishResponse } from "@prisma/client"
 
 export function cn(...inputs: ClassValue[]) {
@@ -44,7 +44,7 @@ export const getChat = async (id: string): Promise<{messages: ChatMessage[]}> =>
 }
 
 // get data points for a chat
-export const getOldDataPoints = async (id: string, idx: number): Promise<{stockfishResponse: StockfishResponse[], chatThread: ChatTab}> => {
+export const getOldDataPoints = async (id: string, idx: number): Promise<{stockfishResponse: StockfishResponse[], chat: Conversation}> => {
   // post to the getDataPoints endpoint
   const response = await fetch(`/api/getDataPoints`, {
     method: 'POST',

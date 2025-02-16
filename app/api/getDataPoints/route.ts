@@ -64,9 +64,24 @@ export async function POST(request: NextRequest) {
         });
 
         console.log(stockfishResponse)
+
+        const chat = {
+            id: chatThread.id,
+            status: chatThread.status.toLowerCase(),
+            type: chatThread.type.toLowerCase(),
+            recipient_address: chatThread.destination,
+            // last_activity: thread.ChatMessage[0]?.updatedAt ?? thread.createdAt,
+            last_activity: chatThread.ChatMessage[chatThread.ChatMessage.length - 1]?.updatedAt ?? chatThread.createdAt,
+            message_count: chatThread.ChatMessage.length,
+            goal: chatThread.goal,
+            requirements: chatThread.requirements,
+            tones: chatThread.tones,
+            // Calculate total cost
+            total_cost: chatThread.ChatMessage.reduce((sum, msg) => sum + (msg.cost || 0), 0)
+        }
         
     
-        return NextResponse.json({ stockfishResponse, chatThread });
+        return NextResponse.json({ stockfishResponse, chat });
       } catch (error) {
         console.error('Error fetching chat:', error);
         return NextResponse.json(

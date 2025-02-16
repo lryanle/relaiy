@@ -12,12 +12,12 @@ model ChatMessage {
   threadId         String
   content          String
   sender           Sender
+  inputTokenUsage  Int        @default(0)
+  outputTokenUsage Int        @default(0)
+  cost             Float      @default(0)
+  modelName        String?
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @default(now())
-  cost             Float      @default(0)
-  inputTokenUsage  Int        @default(0)
-  modelName        String?
-  outputTokenUsage Int        @default(0)
   ChatThread       ChatThread @relation(fields: [threadId], references: [id])
 }
 
@@ -95,14 +95,15 @@ model Verification {
 }
 
 model StockfishResponse {
-  id         String      @id
+  id         String     @id
   response   String
-  createdAt  DateTime    @default(now())
-  isBest     Boolean     @default(false)
-  modelName  String?
-  responseId String?
-  threadId   String?
-  ChatThread ChatThread? @relation(fields: [threadId], references: [id])
+  createdAt  DateTime   @default(now())
+  isBest     Boolean    @default(false)
+  modelName  String
+  responseId String
+  threadId   String
+  ratio      Float      @default(-1)
+  ChatThread ChatThread @relation(fields: [threadId], references: [id])
 }
 
 enum Sender {

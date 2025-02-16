@@ -1,14 +1,14 @@
 "use client";
 
+import { Icons } from "@/components/icons";
+import NavItem from "@/components/nav/navitem";
+import Status from "@/components/status";
+import { formatReceipientId, formatTimeAgo } from "@/lib/utils";
+import { routes } from "@/routing";
+import { CAgent } from "@/types/types";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { Icons } from "@/components/icons";
-import { routes } from "@/routing";
-import { CAgent } from "@/types/types";
-import NavItem from "@/components/nav/navitem";
-import { formatReceipientId, formatTimeAgo } from "@/lib/utils";
-import Status from "@/components/status";
 //! TODO: CONNECT TO ROUTE
 import { Button } from "@/components/ui/button";
 
@@ -85,7 +85,7 @@ export default function Sidebar() {
       </button>
       <nav
         className={`
-                fixed inset-y-0 left-0 z-[70] w-64 bg-white dark:bg-[#0F0F12] transform transition-transform duration-200 ease-in-out
+                fixed inset-y-0 left-0 z-[40] w-64 bg-white dark:bg-[#0F0F12] transform transition-transform duration-200 ease-in-out
                 lg:translate-x-0 lg:static lg:w-64 border-r border-gray-200 dark:border-[#1F1F23]
                 ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
             `}

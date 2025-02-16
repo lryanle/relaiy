@@ -54,10 +54,9 @@ export type ChatTab = {
 export type ChatTabList = ChatTab[]
 
 export type ChatMessage = {
-    id: number
+    role: "user" | "assistant"
     content: string
     timestamp: string
-    role: "user" | "assistant"
 }
 
 export type ChatMessageList = ChatMessage[] 

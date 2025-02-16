@@ -1,42 +1,56 @@
 import { NextResponse } from "next/server";
-import { chatInputSchema, ChatInput, chatOutputSchema, ChatOutput } from "./_schema";
+import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 
 export async function GET(request: Request) {
-  // ask the db for chat with id
-  const { searchParams } = new URL(request.url);
-  const chatId = searchParams.get("chatId");
+  try {
+    const session = await auth.api.getSession({
+      headers: request.headers
+    });
 
-  const input = chatInputSchema.parse({
-    id: chatId,
-  });
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  // ask the db for the chat with the given id
+    const { searchParams } = new URL(request.url);
+    const chatId = searchParams.get("chatId");
 
-  // list of messages in openai format with timestamp in iso format
-  /*
-  [
-    {
-      role: "user",
-      content: "Hello, how are you?",
-      timestamp: new Date().toISOString(),
-    },
-    {
-      role: "assistant",
-      content: "I'm fine, thank you!",
-      timestamp: new Date().toISOString(),
-    },
-  ]
-  */
+    if (!chatId) {
+      return NextResponse.json({ error: "Chat ID is required" }, { status: 400 });
+    }
 
-  const messages = [
-    {
-      role: "user",
-      content: "Hello, how are you?",
-      timestamp: new Date().toISOString(),
-    },
-    ] as const satisfies ChatOutput["messages"];
+    // Get chat thread and messages
+    const chatThread = await prisma.chatThread.findFirst({
+      where: {
+        id: chatId,
+        userId: session.user.id
+      },
+      include: {
+        ChatMessage: {
+          orderBy: {
+            createdAt: 'asc'
+          }
+        }
+      }
+    });
 
-  return NextResponse.json({
-    messages: messages,
-  });
+    if (!chatThread) {
+      return NextResponse.json({ error: "Chat not found" }, { status: 404 });
+    }
+
+    // Map to response format
+    const messages = chatThread.ChatMessage.map(msg => ({
+      role: msg.sender.toLowerCase(),
+      content: msg.content,
+      timestamp: msg.createdAt.toISOString()
+    }));
+
+    return NextResponse.json({ messages });
+  } catch (error) {
+    console.error('Error fetching chat:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch chat' },
+      { status: 500 }
+    );
+  }
 }

@@ -8,12 +8,17 @@ datasource db {
 }
 
 model ChatMessage {
-  id         String     @id
-  content    String
-  sender     Sender
-  timestamp  DateTime   @default(now())
-  threadId   String
-  ChatThread ChatThread @relation(fields: [threadId], references: [id])
+  id               String     @id
+  threadId         String
+  content          String
+  sender           Sender
+  inputTokenUsage  Int        @default(0)
+  outputTokenUsage Int        @default(0)
+  cost             Float      @default(0)
+  modelName        String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @default(now())
+  ChatThread       ChatThread @relation(fields: [threadId], references: [id])
 }
 
 model ChatThread {

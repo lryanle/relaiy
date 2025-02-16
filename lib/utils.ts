@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { ChatMessageList, ChatTabList } from "@/types/chat"
+import { ChatMessage, ChatMessageList, ChatTabList } from "@/types/chat"
 import { Channel } from "@/types/types"
 
 export function cn(...inputs: ClassValue[]) {
@@ -31,10 +31,15 @@ export const getChatsForUser = async (): Promise<ChatTabList | null> => {
 }
 
 // Get specific chat messages
-export const getChat = async (id: number): Promise<ChatMessageList> => {
+export const getChat = async (id: string): Promise<{messages: ChatMessage[]}> => {
     const response = await fetch(`/api/chat?chatId=${id}`)
     const data = await response.json()
-    return data.messages
+    
+    if (data.error) {
+      throw new Error(data.error)
+    }
+    
+    return data
 }
 
 // Create a new chat

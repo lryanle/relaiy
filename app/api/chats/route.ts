@@ -20,7 +20,7 @@ export async function GET(request: Request) {
             include: {
                 ChatMessage: {
                     orderBy: {
-                        timestamp: 'desc'
+                        createdAt: 'desc'
                     },
                     take: 1 // Get latest message
                 },
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
             status: thread.status.toLowerCase(),
             type: thread.type.toLowerCase(),
             recipient_address: thread.destination,
-            last_activity: thread.ChatMessage[0]?.timestamp ?? thread.createdAt,
+            last_activity: thread.ChatMessage[0]?.updatedAt ?? thread.createdAt,
             message_count: thread._count.ChatMessage,
             goal: thread.goal,
             requirements: thread.requirements,
